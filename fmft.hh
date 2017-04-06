@@ -1396,8 +1396,13 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         Multiply replace_([k-q],`K'-`Q');
         if(count(`D2',1) >= 0) Discard;        
         id 1/`D2'^n?pos_ = T1(0,n);
+<<<<<<< HEAD
         else;
 *        Print "Discarding term in tensG %t";
+=======
+
+        else;
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         Discard;        
         endif;
 #endprocedure
@@ -1447,9 +1452,13 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *--#[ tarcer :
 #procedure tarcer(topo)
 
+<<<<<<< HEAD
 
 *       <0> rewrite all tarC1..5 in numerator in terms of sp
 * done in redFG        
+=======
+*       <0> rewrite all tarC1..5 in numerator in terms of sp
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 
 *       <1> reduce scalar products to irreducible set        
         #call redsp(`topo')
@@ -1463,7 +1472,10 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         exit "Not all SP reduced";
         endif;
         endif;
+<<<<<<< HEAD
 *         Print+s;        
+=======
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         .sort:check numerator;        
         
         if(count(int`topo',1));
@@ -1521,9 +1533,12 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
 *       GxG        
         elseif((count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,-1,tarC4,-1) > 0) && (count(tarC5,1) == 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
+<<<<<<< HEAD
 *         if(count(tarC5,1) == 0);
 *         Multiply TensLBL;
 *         id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos0_/tarC2^n2?pos0_/tarC3^n3?pos0_/tarC4^n4?pos0_ = Fab12345(x,y,n1,n2,n3,n4,0);
+=======
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 
         #call tensG(tarC1,tarC3,tk1,tp)
         #call tensG(tarC2,tarC4,tk2,tp)
@@ -1546,8 +1561,11 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *       GxT
         elseif((count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
 
+<<<<<<< HEAD
 *          Multiply TensLBL;
 
+=======
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         Multiply replace_(tk2, tk1 - [tk1-tk2]);
         #call tensT1(tarC5,[tk1-tk2])
 
@@ -1557,6 +1575,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         id tp.tp^n? = pp^n;        
 ***************************************************         
         
+<<<<<<< HEAD
 *         else;
 *         if(match(sdim(?a)) == 0)        
 *         id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?/tarC2^n2?/tarC3^n3?/tarC4^n4?/tarC5^n5? = Tab(x,y,n1,n2,n3,n4,n5);
@@ -1564,10 +1583,15 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         endif;        
 
        
+=======
+        endif;        
+
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         endif;
 
         if(count(sdim,1) == 0) Multiply sdim(0);
 
+<<<<<<< HEAD
         if(count(tp.tk1,1,tp.tk2,1) > 0) Print "Non subs term: %t";
 
         if(count(tp.tk1,1,tp.tk2,1) > 0) exit "Numerator not reduced!!!";
@@ -1575,6 +1599,14 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *       Identify simple integrals(tadpoles and facorized) in shifted dimension        
         #call i2f(`topo')        
 *         #call zeroTFI(`topo')        
+=======
+        if(count(tp.tk1,1,tp.tk2,1) > 0) Print "Numerator term: %t";
+
+        if(count(tp.tk1,1,tp.tk2,1) > 0) exit  "Numerator not reduced!!!";
+        
+*       Identify simple integrals(tadpoles and facorized) in shifted dimension        
+        #call i2f(`topo')        
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 
         endif;
 
@@ -1600,10 +1632,18 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         #call i2f(`topo')        
         #call uniqueTV
         endif;
+<<<<<<< HEAD
 
         .sort:uniqueTV;        
 
         #message reduce and apply DRR V                
+=======
+        .sort:uniqueTV;        
+
+        #message
+        #message reduce and apply DRR V                
+        #message
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         #$repcount = 1;        
         #do irep=1,1
                 #$irep = 1;          
@@ -1625,11 +1665,14 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 #redefine irep "`$irep'"
         #enddo
         
+<<<<<<< HEAD
 *                 if(match(sdim(dp?pos_)/tarC5^n1?pos_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?pos_)) redefine i "0";     
 *                 endif;
 *                 .sort:redV-drrV;                                
 *         #enddo
 
+=======
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 
         if(count(int`topo',1));
         #call i2f(`topo')        
@@ -1637,7 +1680,14 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         endif;
         .sort:uniqueTJ;
 
+<<<<<<< HEAD
         #message reduce and apply DRR J
+=======
+
+        #message
+        #message reduce and apply DRR J
+        #message
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         #$repcount = 1;        
         #do irep=1,1
                 #$irep = 1;                
@@ -1656,6 +1706,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 .sort:redJ-drrJ-`$repcount++';
                 #redefine irep "`$irep'"
         #enddo
+<<<<<<< HEAD
 
 *                 if(match(sdim(dp?pos_)/tarC1^n1?pos_/tarC5^n2?pos_/tarC4^n3?pos_)) redefine i "0";                
 *                 endif;                
@@ -1680,6 +1731,13 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *                 endif;                
 *                 .sort:redF-noshift;                
 *         #enddo
+=======
+        
+        if(count(int`topo',1)) if(match(sdim(dp?pos_))) Print "term: %t";    
+        if(count(int`topo',1)) if(match(sdim(dp?pos_))) exit "Complicated integrals in higher dimensions";    
+        .sort:Check higher dim ints;
+
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 
         #message
         #message reduce F                
@@ -1704,10 +1762,17 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         #enddo
 
 
+<<<<<<< HEAD
 *         #call zeroTFI        
         if(count(int`topo',1));
         #call uniqueTV
         endif;
+=======
+        if(count(int`topo',1));
+        #call uniqueTV
+        endif;
+        .sort:uniqueTV;     
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 
         #message
         #message reduce V                
@@ -1732,6 +1797,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 #redefine irep "`$irep'"
         #enddo
 
+<<<<<<< HEAD
 *         #do i=1,1       
 *                 if(count(int`topo',1));
 *                 #call redV
@@ -1743,10 +1809,16 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *         #enddo
 
 *         #call zeroTFI      
+=======
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
   
         if(count(int`topo',1));        
         #call uniqueTJ
         endif;
+<<<<<<< HEAD
+=======
+        .sort:uniqueTJ;     
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 
         #message
         #message reduce J                
@@ -1770,6 +1842,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 #redefine irep "`$irep'"
         #enddo
         
+<<<<<<< HEAD
 *         #do i=1,1       
 *                 if(count(int`topo',1));
 *                 #call redJ
@@ -1780,12 +1853,20 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *                 endif;
 *                 .sort:redJ-noshift;                
 *         #enddo
+=======
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 
         if(count(int`topo',1));        
         id sdim(0) = 1;
 
+<<<<<<< HEAD
 * Now identify tadpoles and simpler integrals
 *         #call zeroTFI
+=======
+
+* Now identify tadpoles and simpler integrals
+
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 * Two-loop tadpoles
 
         if((count(tarC1,-1) == 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1,tarC4,-1,tarC5,-1) != 0)) id 1/tarC3^n3?/tarC4^n4?/tarC5^n5? = T2(0, n3,n4,n5);
@@ -1809,12 +1890,25 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
         #call partfrac
         .sort:red-FVJ-done;
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 ********************************************************************************************************
 *  Reduce symple integrals        
 
 *         
 *       Two-loop tadpoles        
 *         
+<<<<<<< HEAD
+=======
+
+*       Apply DRR to T2   
+        #message
+        #message drr T2                
+        #message     
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         #do i=1,1
                 if(count(int`topo',1));
                 #call drrT2
@@ -1823,6 +1917,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 .sort:drr-T2;
         #enddo
 
+<<<<<<< HEAD
 *         if(count(int`topo',1)) id T2(n1?,n2?,n3?) = T2(0,n1,n2,n3);
 
 * Wrong order red <-> drr ??        
@@ -1835,6 +1930,13 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *                 .sort
 *         #enddo
 
+=======
+
+*       Reduce T2        
+        #message
+        #message reduce T2                
+        #message
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         #do i=1,1
                 if(count(int`topo',1));
                 #call redT2
@@ -1855,7 +1957,14 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *       One-loop propagator       
 *         
 
+<<<<<<< HEAD
         
+=======
+
+        #message
+        #message reduce G                
+        #message
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 
         if(count(int`topo',1));
         Symmetrize G 2,3;
@@ -1873,6 +1982,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
         #call drrG(`topo')
 
+<<<<<<< HEAD
 *         #do i=1,1
 *                 if(count(int`topo',1));
 *                 #call drrG
@@ -1895,12 +2005,24 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *                 .sort:red-G;
 *         #enddo
 
+=======
+        #call redG(`topo')
+        id G(0,1,1) = Gx11;
+        
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         if(count(int`topo',1));
         id G(dp?,n1?,0) = T1(dp,n1);
         id G(dp?,0,n2?) = T1(dp,n2);
         endif;
 
+<<<<<<< HEAD
 * Now reduce one-loop tadpoles        
+=======
+*       Now reduce one-loop tadpoles        
+        #message
+        #message drr T1                
+        #message
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         #do i=1,1
                 if(count(int`topo',1));
                 #call drrT1
@@ -1909,7 +2031,14 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 .sort:drr-T1;
         #enddo
         
+<<<<<<< HEAD
 *         if(count(int`topo',1)) id T1(n1?) = T1(0,n1);
+=======
+
+        #message
+        #message reduce T1                
+        #message
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         #do i=1,1
                 if(count(int`topo',1));
                 #call redT1
@@ -1922,7 +2051,10 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         #call partfrac
         #call subpoch
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 #endprocedure
 *--#] tarcer :
 
@@ -1939,6 +2071,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 #procedure sp2den(TOPO)
 
 if(count(int`TOPO',1));
+<<<<<<< HEAD
 id p1.p2 = 1/2 + 1/(2*d1) + 1/(2*d2) - 1/(2*d8);
 id p1.p3 = 1/2 + 1/(2*d1) + 1/(2*d3) - 1/(2*d9);
 id p1.p4 = 1/2 + 1/(2*d1) + 1/(2*d4) - 1/(2*d5);
@@ -1948,10 +2081,22 @@ id p1.p7 = 1/(2*d3) - 1/(2*d4) + 1/(2*d5) - 1/(2*d9);
 id p1.p8 = 1/2 + 1/(2*d1) - 1/(2*d2) + 1/(2*d8);
 id p1.p9 = 1/2 + 1/(2*d1) - 1/(2*d3) + 1/(2*d9);
 id p1.p10 = -1/(2*d2) - 1/(2*d3) + 1/(2*d8) + 1/(2*d9);
+=======
+id p1.p2 = 1/2 + d1/2 + d2/2 - d8/2;
+id p1.p3 = 1/2 + d1/2 + d3/2 - d9/2;
+id p1.p4 = 1/2 + d1/2 + d4/2 - d5/2;
+id p1.p5 = 1/2 + d1/2 - d4/2 + d5/2;
+id p1.p6 = d2/2 - d4/2 + d5/2 - d8/2;
+id p1.p7 = d3/2 - d4/2 + d5/2 - d9/2;
+id p1.p8 = 1/2 + d1/2 - d2/2 + d8/2;
+id p1.p9 = 1/2 + d1/2 - d3/2 + d9/2;
+id p1.p10 = -d2/2 - d3/2 + d8/2 + d9/2;
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 endif;
 .sort:sp2den-p1;
 
 if(count(int`TOPO',1));
+<<<<<<< HEAD
 id p2.p3 = 1/(2*d1) - 1/(2*d8) - 1/(2*d9) + 1/(2*d10);
 id p2.p4 = 1/2 + 1/(2*d2) + 1/(2*d4) - 1/(2*d6);
 id p2.p5 = 1/(2*d1) - 1/(2*d4) + 1/(2*d6) - 1/(2*d8);
@@ -1960,10 +2105,21 @@ id p2.p7 = -1/2 + 1/(2*d1) - 1/(2*d2) - 1/(2*d4) + 1/(2*d6) - 1/(2*d8) - 1/(2*d9
 id p2.p8 = -1/2 + 1/(2*d1) - 1/(2*d2) - 1/(2*d8);
 id p2.p9 = 1/2 + 1/(2*d2) + 1/(2*d9) - 1/(2*d10);
 id p2.p10 = -1/2 - 1/(2*d2) + 1/(2*d9) - 1/(2*d10);
+=======
+id p2.p3 = d1/2 - d8/2 - d9/2 + d10/2;
+id p2.p4 = 1/2 + d2/2 + d4/2 - d6/2;
+id p2.p5 = d1/2 - d4/2 + d6/2 - d8/2;
+id p2.p6 = 1/2 + d2/2 - d4/2 + d6/2;
+id p2.p7 = -1/2 + d1/2 - d2/2 - d4/2 + d6/2 - d8/2 - d9/2 + d10/2;
+id p2.p8 = -1/2 + d1/2 - d2/2 - d8/2;
+id p2.p9 = 1/2 + d2/2 + d9/2 - d10/2;
+id p2.p10 = -1/2 - d2/2 + d9/2 - d10/2;
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 endif;
 .sort:sp2den-p2;
 
 if(count(int`TOPO',1));
+<<<<<<< HEAD
 id p3.p4 = 1/2 + 1/(2*d3) + 1/(2*d4) - 1/(2*d7);
 id p3.p5 = 1/(2*d1) - 1/(2*d4) + 1/(2*d7) - 1/(2*d9);
 id p3.p6 = -1/2 + 1/(2*d1) - 1/(2*d3) - 1/(2*d4) + 1/(2*d7) - 1/(2*d8) - 1/(2*d9) + 1/(2*d10);
@@ -1971,51 +2127,99 @@ id p3.p7 = 1/2 + 1/(2*d3) - 1/(2*d4) + 1/(2*d7);
 id p3.p8 = 1/2 + 1/(2*d3) + 1/(2*d8) - 1/(2*d10);
 id p3.p9 = -1/2 + 1/(2*d1) - 1/(2*d3) - 1/(2*d9);
 id p3.p10 = -1/2 - 1/(2*d3) + 1/(2*d8) - 1/(2*d10);
+=======
+id p3.p4 = 1/2 + d3/2 + d4/2 - d7/2;
+id p3.p5 = d1/2 - d4/2 + d7/2 - d9/2;
+id p3.p6 = -1/2 + d1/2 - d3/2 - d4/2 + d7/2 - d8/2 - d9/2 + d10/2;
+id p3.p7 = 1/2 + d3/2 - d4/2 + d7/2;
+id p3.p8 = 1/2 + d3/2 + d8/2 - d10/2;
+id p3.p9 = -1/2 + d1/2 - d3/2 - d9/2;
+id p3.p10 = -1/2 - d3/2 + d8/2 - d10/2;
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 endif;
 .sort:sp2den-p3;
 
 if(count(int`TOPO',1));
+<<<<<<< HEAD
 id p4.p5 = -1/2 + 1/(2*d1) - 1/(2*d4) - 1/(2*d5);
 id p4.p6 = -1/2 + 1/(2*d2) - 1/(2*d4) - 1/(2*d6);
 id p4.p7 = -1/2 + 1/(2*d3) - 1/(2*d4) - 1/(2*d7);
 id p4.p8 = 1/(2*d1) - 1/(2*d2) - 1/(2*d5) + 1/(2*d6);
 id p4.p9 = 1/(2*d1) - 1/(2*d3) - 1/(2*d5) + 1/(2*d7);
 id p4.p10 = -1/2 + 1/(2*d1) - 1/(2*d2) - 1/(2*d3) - 1/(2*d4) - 1/(2*d5) + 1/(2*d6) + 1/(2*d7);
+=======
+id p4.p5 = -1/2 + d1/2 - d4/2 - d5/2;
+id p4.p6 = -1/2 + d2/2 - d4/2 - d6/2;
+id p4.p7 = -1/2 + d3/2 - d4/2 - d7/2;
+id p4.p8 = d1/2 - d2/2 - d5/2 + d6/2;
+id p4.p9 = d1/2 - d3/2 - d5/2 + d7/2;
+id p4.p10 = -1/2 + d1/2 - d2/2 - d3/2 - d4/2 - d5/2 + d6/2 + d7/2;
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 endif;
 .sort:sp2den-p4;
 
 if(count(int`TOPO',1));
+<<<<<<< HEAD
 id p5.p6 = 1/2 + 1/(2*d5) + 1/(2*d6) - 1/(2*d8);
 id p5.p7 = 1/2 + 1/(2*d5) + 1/(2*d7) - 1/(2*d9);
 id p5.p8 = 1/2 + 1/(2*d5) - 1/(2*d6) + 1/(2*d8);
 id p5.p9 = 1/2 + 1/(2*d5) - 1/(2*d7) + 1/(2*d9);
 id p5.p10 = 1/2 - 1/(2*d1) + 1/(2*d4) + 1/(2*d5) - 1/(2*d6) - 1/(2*d7) + 1/(2*d8) + 1/(2*d9);
+=======
+id p5.p6 = 1/2 + d5/2 + d6/2 - d8/2;
+id p5.p7 = 1/2 + d5/2 + d7/2 - d9/2;
+id p5.p8 = 1/2 + d5/2 - d6/2 + d8/2;
+id p5.p9 = 1/2 + d5/2 - d7/2 + d9/2;
+id p5.p10 = 1/2 - d1/2 + d4/2 + d5/2 - d6/2 - d7/2 + d8/2 + d9/2;
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 endif;
 .sort:sp2den-p5;
 
 if(count(int`TOPO',1));
+<<<<<<< HEAD
 id p6.p7 = 1/(2*d1) - 1/(2*d2) - 1/(2*d3) + 1/(2*d6) + 1/(2*d7) - 1/(2*d8) - 1/(2*d9) + 1/(2*d10);
 id p6.p8 = -1/2 + 1/(2*d5) - 1/(2*d6) - 1/(2*d8);
 id p6.p9 = 1/2 - 1/(2*d1) + 1/(2*d2) + 1/(2*d3) + 1/(2*d5) - 1/(2*d7) + 1/(2*d9) - 1/(2*d10);
 id p6.p10 = -1/(2*d1) + 1/(2*d3) + 1/(2*d4) + 1/(2*d5) - 1/(2*d6) - 1/(2*d7) + 1/(2*d9) - 1/(2*d10);
+=======
+id p6.p7 = d1/2 - d2/2 - d3/2 + d6/2 + d7/2 - d8/2 - d9/2 + d10/2;
+id p6.p8 = -1/2 + d5/2 - d6/2 - d8/2;
+id p6.p9 = 1/2 - d1/2 + d2/2 + d3/2 + d5/2 - d7/2 + d9/2 - d10/2;
+id p6.p10 = -d1/2 + d3/2 + d4/2 + d5/2 - d6/2 - d7/2 + d9/2 - d10/2;
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 endif;
 .sort:sp2den-p6;
 
 if(count(int`TOPO',1));
+<<<<<<< HEAD
 id p7.p8 = 1/2 - 1/(2*d1) + 1/(2*d2) + 1/(2*d3) + 1/(2*d5) - 1/(2*d6) + 1/(2*d8) - 1/(2*d10);
 id p7.p9 = -1/2 + 1/(2*d5) - 1/(2*d7) - 1/(2*d9);
 id p7.p10 = -1/(2*d1) + 1/(2*d2) + 1/(2*d4) + 1/(2*d5) - 1/(2*d6) - 1/(2*d7) + 1/(2*d8) - 1/(2*d10);
+=======
+id p7.p8 = 1/2 - d1/2 + d2/2 + d3/2 + d5/2 - d6/2 + d8/2 - d10/2;
+id p7.p9 = -1/2 + d5/2 - d7/2 - d9/2;
+id p7.p10 = -d1/2 + d2/2 + d4/2 + d5/2 - d6/2 - d7/2 + d8/2 - d10/2;
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 endif;
 .sort:sp2den-p7;
 
 if(count(int`TOPO',1));
+<<<<<<< HEAD
 id p8.p9 = 1/(2*d1) - 1/(2*d2) - 1/(2*d3) + 1/(2*d10);
 id p8.p10 = 1/2 - 1/(2*d3) + 1/(2*d8) + 1/(2*d10);
+=======
+id p8.p9 = d1/2 - d2/2 - d3/2 + d10/2;
+id p8.p10 = 1/2 - d3/2 + d8/2 + d10/2;
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 endif;
 .sort:sp2den-p8;
 
 if(count(int`TOPO',1));
+<<<<<<< HEAD
 id p9.p10 = 1/2 - 1/(2*d2) + 1/(2*d9) + 1/(2*d10);
+=======
+id p9.p10 = 1/2 - d2/2 + d9/2 + d10/2;
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
 endif;
 .sort:sp2den-p9;
 
@@ -8494,9 +8698,12 @@ num(-1 + pp + tk1.tk1 - 2*tk1.tk2 + 2*tk1.tk4 - 2*tk1.tp + tk2.tk2 - 2*tk2.tk4 +
 *    one-loop tensor integral k4(mu)...*k4(nu)...
 *    leading to (p.k1), (p.k2), k1^2, k2^2
 
+<<<<<<< HEAD
 *    [CMM] hep-ph/9711266, eq.67, eq.70
 *    and than apply procedure drrG
 
+=======
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         if(count(intFG,1));
 
         if((count(d2,1) >= 0) && (count(d10,1) >= 0));
@@ -11368,16 +11575,31 @@ ModuleOption,minimum,$irep;
         #call sp2den(FMFT)        
 
         if(count(intFMFT,1));
+<<<<<<< HEAD
         if((count(d1,-1) <= 0) && (count(d10,-1) > 0));
         Multiply intX/intFMFT;
+=======
+
+        if((count(d1,-1) <= 0) && (count(d10,-1) > 0));
+        Multiply intX/intFMFT;
+
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         elseif(match(1/d1^n1?pos_/d2^n2?pos_/d3^n3?pos_/d4^n4?pos_/d5^n5?pos_/d6^n6?neg0_/d7^n7?pos_/d8^n8?pos_/d9^n9?pos_/d10^n10?pos_));
         Multiply replace_(d5,d3, d9,d4, d3,d5, d10,d6, d4,d9, d6,d10)*intH/intFMFT;
 
         elseif(match(1/d1^n1?pos_/d2^n2?pos_/d3^n3?pos_/d4^n4?pos_/d5^n5?pos_/d6^n6?pos_/d7^n7?neg0_/d8^n8?pos_/d9^n9?pos_/d10^n10?pos_));
         Multiply replace_(d3,d2, d5,d3, d8,d4, d2,d5, d10,d6, d6,d7, d9,d8, d4,d9, d7,d10)*intH/intFMFT;
+<<<<<<< HEAD
         elseif(count(d10,-1) <= 0);
         Multiply intH/intFMFT;
         endif;
+=======
+
+        elseif(count(d10,-1) <= 0);
+        Multiply intH/intFMFT;
+        endif;
+
+>>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
         endif;
 
 
