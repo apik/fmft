@@ -100,8 +100,11 @@ V k1,k2,k3,k4;
 
 V tk4,mtk4,mtp;
 
-* TOPO sumbols
+* TOPO symbols
 S intFMFT,intX,intH,intBMW,intFG,int1d;
+
+* TOPO symbols for isp reduction
+S intGxG,intGxT,intTxG;
 
 * averts
 S [sqrt(x)],[x],n,s;
@@ -148,9 +151,11 @@ CF sdim;
 * New denominators
 S [pp-tmm],[pp-3*tmm],[pp-4*tmm],[pp-9*tmm],mm,mden,tmm;
 
-CF Txx;
 
-Table Tab(0:10,0:10,n1?,n2?,n3?,n4?,n5?);
+* Function corresponding to tables to substitute one by one
+CF tFab12345,tVab2345,tVab1345,tVab1245,tVab1235,tJab145,tJab235,tKab125,tKab345;
+S pocoisp;
+
 Table,sparse,Fab12345(2,n1?,n2?,n3?,n4?,n5?);
 
 Table,sparse,Vab2345(2,n2?,n3?,n4?,n5?);
@@ -1477,35 +1482,35 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
 *       V2345        
         if((count(tarC1,1) == 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = Vab2345(x,y,n2,n3,n4,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab2345(x,y,n2,n3,n4,n5);
 
 *       V1345        
         elseif((count(tarC1,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = Vab1345(x,y,n1,n3,n4,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab1345(x,y,n1,n3,n4,n5);
 
 *       V1245        
         elseif((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,1) == 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = Vab1245(x,y,n1,n2,n4,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab1245(x,y,n1,n2,n4,n5);
 
 *       V1235        
         elseif((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = Vab1235(x,y,n1,n2,n3,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab1235(x,y,n1,n2,n3,n5);
 
 *       J145        
         elseif((count(tarC1,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC3,1) == 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = Jab145(x,y,n1,n4,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tJab145(x,y,n1,n4,n5);
 
 *       J235        
         elseif((count(tarC1,1) == 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = Jab235(x,y,n2,n3,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tJab235(x,y,n2,n3,n5);
 
 *       K125        
         elseif((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,1) == 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC5^n5?pos_ = Kab125(x,y,n1,n2,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tKab125(x,y,n1,n2,n5);
 
 *       K345        
         elseif((count(tarC1,1) == 0) && (count(tarC2,1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = Kab345(x,y,n3,n4,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tKab345(x,y,n3,n4,n5);
 
 
 ********         
@@ -1518,53 +1523,137 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
 *       GxG        
         elseif((count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,-1,tarC4,-1) > 0) && (count(tarC5,1) == 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
+        Multiply intGxG/intFG;        
 
-        #call tensG(tarC1,tarC3,tk1,tp)
-        #call tensG(tarC2,tarC4,tk2,tp)
-        id tp.tp^n? = pp^n;        
+*         #call tensG(tarC1,tarC3,tk1,tp)
+*         #call tensG(tarC2,tarC4,tk2,tp)
+*         id tp.tp^n? = pp^n;        
 ***************************************************         
 
 *       TxG
         elseif((count(tarC1,1) == 0) && (count(tarC2,-1,tarC4,-1) > 0) && (count(tarC3,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
 
-*       First integrate tadpole with tk1,tk2 in denominator:        
-        Multiply replace_(tk1,[tk1-tk2] + tk2);
-        #call tensT1(tarC5,[tk1-tk2])
+        Multiply intTxG/intFG;        
+* *       First integrate tadpole with tk1,tk2 in denominator:        
+*         Multiply replace_(tk1,[tk1-tk2] + tk2);
+*         #call tensT1(tarC5,[tk1-tk2])
 
-*       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
-        Multiply replace_([tk1-tk2],tk1 - tk2);        
-        #call tensG(tarC2,tarC4,tk2,tp)
-        id tp.tp^n? = pp^n;        
+* *       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
+*         Multiply replace_([tk1-tk2],tk1 - tk2);        
+*         #call tensG(tarC2,tarC4,tk2,tp)
+*         id tp.tp^n? = pp^n;        
 ***************************************************         
 
 *       GxT
         elseif((count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
+        Multiply intGxT/intFG;        
 
-        Multiply replace_(tk2, tk1 - [tk1-tk2]);
-        #call tensT1(tarC5,[tk1-tk2])
+*         Multiply replace_(tk2, tk1 - [tk1-tk2]);
+*         #call tensT1(tarC5,[tk1-tk2])
 
-*       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
-        Multiply replace_([tk1-tk2],tk1 - tk2);        
-        #call tensG(tarC1,tarC3,tk1,tp)
-        id tp.tp^n? = pp^n;        
+* *       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
+*         Multiply replace_([tk1-tk2],tk1 - tk2);        
+*         #call tensG(tarC1,tarC3,tk1,tp)
+*         id tp.tp^n? = pp^n;        
 ***************************************************         
-        
         endif;        
 
+        else;
+
+*       For integrals wo isp in numerator we apply zero shift        
+        Multiply sdim(0);
         endif;
 
-        if(count(sdim,1) == 0) Multiply sdim(0);
 
-        if(count(tp.tk1,1,tp.tk2,1) > 0) Print "Numerator term: %t";
+        if((count(intFG,1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0)) Print "Numerator term: %t";
 
-        if(count(tp.tk1,1,tp.tk2,1) > 0) exit  "Numerator not reduced!!!";
+        if((count(intFG,1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0)) exit  "Numerator not reduced!!!";
         
 *       Identify simple integrals(tadpoles and facorized) in shifted dimension        
         #call i2f(`topo')        
 
         endif;
 
+        .sort:Tab-tab;
+
+
+*       Tensor reduction for factorized integrals         
+        if(count(intGxG,1));
+        #call tensG(tarC1,tarC3,tk1,tp)
+        endif;
+        .sort:intGxG-1;
+        if(count(intGxG,1));
+        #call tensG(tarC2,tarC4,tk2,tp)
+        id tp.tp^n? = pp^n;        
+        Multiply intFG/intGxG;        
+        endif;        
+        .sort:intGxG-2;
+
+        if(count(intTxG,1));
+*       First integrate tadpole with tk1,tk2 in denominator:        
+        Multiply replace_(tk1,[tk1-tk2] + tk2);
+        #call tensT1(tarC5,[tk1-tk2])
+        endif;
+        .sort:intTxG-1;
+        if(count(intTxG,1));
+*       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
+        Multiply replace_([tk1-tk2],tk1 - tk2);        
+        #call tensG(tarC2,tarC4,tk2,tp)
+        id tp.tp^n? = pp^n;        
+        Multiply intFG/intTxG;        
+        endif;        
+        .sort:intTxG-2;
+
+        if(count(intGxT,1));
+        Multiply replace_(tk2, tk1 - [tk1-tk2]);
+        #call tensT1(tarC5,[tk1-tk2])
+        endif;
+        .sort:intGxT-1;
+        if(count(intGxT,1));
+*       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
+        Multiply replace_([tk1-tk2],tk1 - tk2);        
+        #call tensG(tarC1,tarC3,tk1,tp)
+        id tp.tp^n? = pp^n;                
+         Multiply intFG/intGxT;        
+        endif;        
+        .sort:intGxT-2;
+
         
+**********************************************************************************************
+* 
+*       Here we substitute RHS with tables but only for 
+*       fixed maximal power of isp in numerator
+* 
+
+        #$pisp = 0;
+        if ( count(pocoisp,1) > $pisp ) $pisp = count_(pocoisp,1);
+        .sort
+        #write ">>>                            "        
+        #write ">>>   Maximal isp power: `$pisp'"
+        #write ">>>                            "
+
+
+        #do xyp = `$pisp',1,-1
+                id pocoisp^`xyp'*tVab2345(x?,y?,n2?,n3?,n4?,n5?) = Vab2345(x,y,n2,n3,n4,n5);
+                .sort:tabV2345-`xyp';                
+                id pocoisp^`xyp'*tVab1345(x?,y?,n1?,n3?,n4?,n5?) = Vab1345(x,y,n1,n3,n4,n5);
+                .sort:tabV1345-`xyp';                
+                id pocoisp^`xyp'*tVab1245(x?,y?,n1?,n2?,n4?,n5?) = Vab1245(x,y,n1,n2,n4,n5);
+                .sort:tabV1245-`xyp';                
+                id pocoisp^`xyp'*tVab1235(x?,y?,n1?,n2?,n3?,n5?) = Vab1235(x,y,n1,n2,n3,n5);
+                .sort:tabV1235-`xyp';                
+
+                id pocoisp^`xyp'*tJab145(x?,y?,n1?,n4?,n5?) = Jab145(x,y,n1,n4,n5);
+                .sort:tabJ145-`xyp';                
+                id pocoisp^`xyp'*tJab235(x?,y?,n2?,n3?,n5?) = Jab235(x,y,n2,n3,n5);
+                .sort:tabJ235-`xyp';                
+
+                id pocoisp^`xyp'*tKab125(x?,y?,n1?,n2?,n5?) = Kab125(x,y,n1,n2,n5);
+                .sort:tabK125-`xyp';                
+                id pocoisp^`xyp'*tKab345(x?,y?,n3?,n4?,n5?) = Kab345(x,y,n3,n4,n5);
+                .sort:tabK345-`xyp';                
+        #enddo                
+
 **********************************************************************************************
         
 *       <3> reduce scalar integrals in arbitrary dimension
