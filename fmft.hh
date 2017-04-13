@@ -1963,6 +1963,20 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *--#[ sp2den :
 #procedure sp2den(TOPO)
 
+if(count(int`TOPO',1));        
+id p1.p1 = 1 + d1;
+id p2.p2 = 1 + d2;
+id p3.p3 = 1 + d3;
+id p4.p4 = 1 + d4;
+id p5.p5 = 1 + d5;
+id p6.p6 = 1 + d6;
+id p7.p7 = 1 + d7;
+id p8.p8 = 1 + d8;
+id p9.p9 = 1 + d9;
+id p10.p10 = 1 + d10;
+endif;
+.sort:sp2den-pp;
+        
 if(count(int`TOPO',1));
 id p1.p2 = 1/2 + d1/2 + d2/2 - d8/2;
 id p1.p3 = 1/2 + d1/2 + d3/2 - d9/2;
