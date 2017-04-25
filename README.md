@@ -1,7 +1,6 @@
 ## Basic topologies
 
-![FMFT topologies]
-(https://raw.githubusercontent.com/wiki/apik/fmft/topo.png)
+![FMFT topologies](https://raw.githubusercontent.com/wiki/apik/fmft/topo.png)
 
 ## Input and examples
 
