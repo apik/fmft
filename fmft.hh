@@ -11983,14 +11983,14 @@ ModuleOption,minimum,$irep;
           - 4/3*z3
           )
 
+       + PR9ep0
+
        + ep * (
           + PR9ep1
           )
 
-       + PR9ep0
-
-       + ep * (
-          Oep(1,PR9)
+       + ep^2 * (
+          Oep(2,PR9)
           )
         ;
 
@@ -12018,14 +12018,14 @@ ModuleOption,minimum,$irep;
           + 29/9*z3
           )
 
+       + PR9dep0
+
        + ep * (
           + PR9dep1
           )
 
-       + PR9dep0
-
-       + ep * (
-          Oep(1,PR9d)
+       + ep^2 * (
+          Oep(2,PR9d)
           )
         ;
 
