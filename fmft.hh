@@ -100,8 +100,11 @@ V k1,k2,k3,k4;
 
 V tk4,mtk4,mtp;
 
-* TOPO sumbols
+* TOPO symbols
 S intFMFT,intX,intH,intBMW,intFG,int1d;
+
+* TOPO symbols for isp reduction
+S intGxG,intGxT,intTxG;
 
 * averts
 S [sqrt(x)],[x],n,s;
@@ -148,9 +151,11 @@ CF sdim;
 * New denominators
 S [pp-tmm],[pp-3*tmm],[pp-4*tmm],[pp-9*tmm],mm,mden,tmm;
 
-CF Txx;
 
-Table Tab(0:10,0:10,n1?,n2?,n3?,n4?,n5?);
+* Function corresponding to tables to substitute one by one
+CF tFab12345,tVab2345,tVab1345,tVab1245,tVab1235,tJab145,tJab235,tKab125,tKab345;
+S pocoisp;
+
 Table,sparse,Fab12345(2,n1?,n2?,n3?,n4?,n5?);
 
 Table,sparse,Vab2345(2,n2?,n3?,n4?,n5?);
@@ -313,8 +318,8 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *--#] dzero :
 
 *--#[ zeroTFI :
-#procedure zeroTFI(in)
-        if(count(int`in',1));
+#procedure zeroTFI(topo)
+        if(count(int`topo',1));
         #call dzero3(2,4,5)        
         #call dzero3(1,3,5)                
         #call dzero4(1,2,3,4)                
@@ -328,7 +333,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
 * Here we cancel each scalar product with its corresponding denominator
 *--#[ spcontract1 :
-#procedure spcontract1(in)
+#procedure spcontract1(topo,nc)
 * 
 * 
 *       Red SP 1
@@ -338,7 +343,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         #$repcount = 1;                
         #do irep=1,1       
                 #$irep = 1;
-                if(count(int`in',1));
+                if(count(int`topo',1));
                 
 *               (tk1^1)--
                 if(count(tk1.tk1,1) > count(tarC1,-1));
@@ -394,7 +399,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 la endrec;
                 
                 ModuleOption,minimum,$irep;
-                .sort:red-SP-1-`$repcount++';
+                .sort:red-SP1-`nc'-`$repcount++';
                 #redefine irep "`$irep'"
         #enddo        
 #endprocedure
@@ -405,11 +410,11 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 * Here we cancel k1.k1 with C3 and k2.k2 with C4
 * 
 *--#[ spcontract2 :
-#procedure spcontract2(in)
+#procedure spcontract2(topo,nc)
         #$repcount = 1;                
         #do irep=1,1       
                 #$irep = 1;
-                if(count(int`in',1));
+                if(count(int`topo',1));
                 
 * <-7-> V()
                 if(count(tarC1,-1) == 0);
@@ -435,18 +440,18 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 la endrec;
                 
                 ModuleOption,minimum,$irep;
-                .sort:red-SP-2-`$repcount++';
+                .sort:red-SP2-`nc'-`$repcount++';
                 #redefine irep "`$irep'"
         #enddo        
 #endprocedure
 *--#] spcontract2 :
 
 
-#procedure GGdecouple(in)
+#procedure GGdecouple(topo)
 *       <-9->        
 *       B()*B()
 *       Gamma[k + a_] -> Po[a, k]*Gamma[a]
-        if(count(int`in',1));
+        if(count(int`topo',1));
         if(count(tarC5,-1) == 0);
         id tk1.tk1^v?*tk2.tk2^w?*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?pos_/tarC1^n1?/tarC2^n2?/tarC3^n3?/tarC4^n4? =
         sum_(k, 0, integer_(z/2), sum_(i, 0, k, sum_(j, 0, k, sign_(i + j)*tk1.tk1^(i + v)*tk2.tk2^(j + w)*pp^(i + j - z)*tp.tk1^(-2*i + x + z)*tp.tk2^(-2*j + y + z)*binom_(k, i)*binom_(k, j)*binom_(z, 2*k)*Pochhammer(k,1/2)*PochhammerINV(k,-1/2 + d/2)/(tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4))));
@@ -454,8 +459,8 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         endif;        
 #endprocedure
 
-#procedure convV(in)
-        if(count(int`in',1));
+#procedure convV(topo)
+        if(count(int`topo',1));
 *       <-13-> V()
         if((count(tk1.tk1,1) == 0) && (count(tk2.tk2,1) == 0) && (count(tp.tk1,1) == 0) && (count(tk1.tk2,1) == 0) && (count(tarC2,-1) == 0));
         id,ifmatch->sortsp tp.tk2^y?pos_/tarC1^n1?/tarC3^n3?/tarC4^n4?pos_/tarC5^n5? =
@@ -474,11 +479,11 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
 
 * We reduce all k1.p and k2.p to C1C2C5
-#procedure redTad125(in)
+#procedure redTad125(topo)
         #$repcount = 1;                
         #do irep=1,1       
                 #$irep = 1;
-                if(count(int`in',1));
+                if(count(int`topo',1));
 *       zero if odd(x+y)=true
                 if((count(tarC3,-1)) == 0 && (count(tarC4,-1) == 0));
                 id tk1.tk1^v?*tk2.tk2^w?*tp.tk1^x?pos0_*tp.tk2^y?pos0_*tk1.tk2^z?/tarC1^n1?pos_/tarC2^n2?pos_/tarC5^n5? =
@@ -509,8 +514,8 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         #enddo        
 #endprocedure
 
-#procedure convto124(in)
-        if(count(int`in',1));
+#procedure convto124(topo)
+        if(count(int`topo',1));
 *       First convert from 135 to 245
 *       <-21->
         if((count(tk2.tk2,1) > 0) && (count(tk1.tk2,1) == 0) && (count(tarC2,-1) == 0) && (count(tarC4,-1) == 0))
@@ -534,60 +539,60 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
 
 *--#[ redsp :
-#procedure redsp(in)
+#procedure redsp(topo)
 
 *   <1> first step in the end no 5 prop integrals
 *       with corresponding SP        
-        #call spcontract1(`in')
-        #call zeroTFI(`in')        
+        #call spcontract1(`topo',1)
+        #call zeroTFI(`topo')        
 
 *   <2> decouple k1.k2 when there is no C5       
-        #call GGdecouple(`in')
-        #call zeroTFI(`in')        
+        #call GGdecouple(`topo')
+        #call zeroTFI(`topo')        
 
 *   <3> cancel k1.k1/C1 and k2.k2/C2 again        
-        #call spcontract1(`in')
-        #call zeroTFI(`in')       
+        #call spcontract1(`topo',2)
+        #call zeroTFI(`topo')       
  
 * ----- At this point we have only four propagators and no k1.k2
 *   <4> cancel k1.k1/C3 and k2.k2/C4        
-        #call spcontract2(`in')
-        #call zeroTFI(`in')       
+        #call spcontract2(`topo',2)
+        #call zeroTFI(`topo')       
 
 * ----- Here we have only k1.k1/245 and k2.k2/135 
 *       and 2-loop tadpoles 125 and 345
 *   <5> redce tadpoles 125        
-        #call redTad125(`in')        
-        #call zeroTFI(`in')       
+        #call redTad125(`topo')        
+        #call zeroTFI(`topo')       
         
 *   <6> cancel k1.k1/C1 k2.k2/C2 and k1.k2/C5 in C125 tadpoles
-        #call spcontract1(`in')
-        #call zeroTFI(`in')       
+        #call spcontract1(`topo',3)
+        #call zeroTFI(`topo')       
 
 *   <7> cancel k1.k2/C1/C2        
-        #call GGdecouple(`in')
-        #call zeroTFI(`in')        
+        #call GGdecouple(`topo')
+        #call zeroTFI(`topo')        
 
 *   <8> cancel k1.k1/C1 k2.k2/C2
-        #call spcontract1(`in')
-        #call zeroTFI(`in')       
+        #call spcontract1(`topo',4)
+        #call zeroTFI(`topo')       
 
 * ----- Now we 
 *   <9> convert all 135 and 245 to 124            
-        #call convto124(`in')
-        #call zeroTFI(`in')       
+        #call convto124(`topo')
+        #call zeroTFI(`topo')       
 
 *  <10> cancel k1.k2
-        #call GGdecouple(`in')
-        #call zeroTFI(`in')        
+        #call GGdecouple(`topo')
+        #call zeroTFI(`topo')        
 
 *  <11> cancel k1.k1/C1 and k2.k2/C2
-        #call spcontract1(`in')
-        #call zeroTFI(`in')       
+        #call spcontract1(`topo',5)
+        #call zeroTFI(`topo')       
 
 *  <12> cancel k2.k2/C4
-        #call spcontract2(`in')
-        #call zeroTFI(`in')       
+        #call spcontract2(`topo',2)
+        #call zeroTFI(`topo')       
 #endprocedure
 
 *--#] redsp :
@@ -1115,7 +1120,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
 
 *--#[ drrG :
-#procedure drrG(in)
+#procedure drrG(topo)
 
 *       Now we need symmetrize only once, because structure (dp,n1 < n2) is kept
         Symmetrize G 2,3;
@@ -1123,7 +1128,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         #$repcount = 1;        
         #do irep=1,1
                 #$irep = 1;                
-                if(count(int`in',1));
+                if(count(int`topo',1));
                
 * eq.95
                 id,ifmatch->sortme G(dp?pos_,n1?{>1},n2?pos_) = 
@@ -1146,7 +1151,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         #$repcount = 1;        
         #do irep=1,1
                 #$irep = 1;                
-                if(count(int`in',1));
+                if(count(int`topo',1));
                 
 * eq.96
                 id,ifmatch->sortme G(dp?pos_,1,n2?pos_) = 
@@ -1168,11 +1173,11 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *--#] drrG :
 
 *--#[ redG :
-#procedure redG(in)
+#procedure redG(topo)
         #$repcount = 1;        
         #do irep=1,1
                 #$irep = 1;                
-                if(count(int`in',1));
+                if(count(int`topo',1));
                 
                 Symmetrize G 3,2;
 * eq.94
@@ -1462,7 +1467,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
 *       <1> reduce scalar products to irreducible set        
         #call redsp(`topo')
-
+        #printtimes
 
 *       <2> convert integrals with irreducible numerator to
 *           scalar integrals with shifted dimension       
@@ -1480,47 +1485,42 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         
         if(count(int`topo',1));
 
-*       ERROR if no rules to reduce ISP of given weight        
-        if(count(tp.tk1,1,tp.tk2,1) > `SPMAXRANK');        
-        exit "Irreducible sp table weight `SPMAXRANK' is to low";
-        elseif(count(tp.tk1,1,tp.tk2,1) > 0);        
-
-
+        if(count(tp.tk1,1,tp.tk2,1) > 0);        
 *********         
 *       When all 5 propagators present - tensor reduction not needed!!!        
 *********        
 
 *       V2345        
         if((count(tarC1,1) == 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = Vab2345(x,y,n2,n3,n4,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab2345(x,y,n2,n3,n4,n5);
 
 *       V1345        
         elseif((count(tarC1,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = Vab1345(x,y,n1,n3,n4,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab1345(x,y,n1,n3,n4,n5);
 
 *       V1245        
         elseif((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,1) == 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = Vab1245(x,y,n1,n2,n4,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab1245(x,y,n1,n2,n4,n5);
 
 *       V1235        
         elseif((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = Vab1235(x,y,n1,n2,n3,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab1235(x,y,n1,n2,n3,n5);
 
 *       J145        
         elseif((count(tarC1,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC3,1) == 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = Jab145(x,y,n1,n4,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tJab145(x,y,n1,n4,n5);
 
 *       J235        
         elseif((count(tarC1,1) == 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = Jab235(x,y,n2,n3,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tJab235(x,y,n2,n3,n5);
 
 *       K125        
         elseif((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,1) == 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC5^n5?pos_ = Kab125(x,y,n1,n2,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tKab125(x,y,n1,n2,n5);
 
 *       K345        
         elseif((count(tarC1,1) == 0) && (count(tarC2,1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = Kab345(x,y,n3,n4,n5);
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tKab345(x,y,n3,n4,n5);
 
 
 ********         
@@ -1531,86 +1531,122 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *       !!! No tarC1...tarC5 in numerator at this point !!!
 *         
 
+***************************************************         
 *       GxG        
         elseif((count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,-1,tarC4,-1) > 0) && (count(tarC5,1) == 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-<<<<<<< HEAD
-*         if(count(tarC5,1) == 0);
-*         Multiply TensLBL;
-*         id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos0_/tarC2^n2?pos0_/tarC3^n3?pos0_/tarC4^n4?pos0_ = Fab12345(x,y,n1,n2,n3,n4,0);
-=======
->>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
+        Multiply intGxG/intFG;        
 
-        #call tensG(tarC1,tarC3,tk1,tp)
-        #call tensG(tarC2,tarC4,tk2,tp)
-        id tp.tp^n? = pp^n;        
 ***************************************************         
-
 *       TxG
         elseif((count(tarC1,1) == 0) && (count(tarC2,-1,tarC4,-1) > 0) && (count(tarC3,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
+        Multiply intTxG/intFG;        
 
+***************************************************         
+*       GxT
+        elseif((count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
+        Multiply intGxT/intFG;        
+        endif;        
+
+        else;
+*       For integrals wo isp in numerator we apply zero shift        
+        Multiply sdim(0);
+        endif;
+
+
+        if((count(intFG,1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0)) Print "Numerator term: %t";
+
+        if((count(intFG,1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0)) exit  "Numerator not reduced!!!";
+        
+*       Identify simple integrals(tadpoles and facorized) in shifted dimension        
+        #call i2f(`topo')        
+
+        endif;
+
+        .sort:Tab-tab;
+
+
+*       Tensor reduction for factorized integrals         
+        if(count(intGxG,1));
+        #call tensG(tarC1,tarC3,tk1,tp)
+        endif;
+        .sort:intGxG-1;
+        if(count(intGxG,1));
+        #call tensG(tarC2,tarC4,tk2,tp)
+        id tp.tp^n? = pp^n;        
+        Multiply intFG/intGxG;        
+        endif;        
+        .sort:intGxG-2;
+
+        if(count(intTxG,1));
 *       First integrate tadpole with tk1,tk2 in denominator:        
         Multiply replace_(tk1,[tk1-tk2] + tk2);
         #call tensT1(tarC5,[tk1-tk2])
-
+        endif;
+        .sort:intTxG-1;
+        if(count(intTxG,1));
 *       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
         Multiply replace_([tk1-tk2],tk1 - tk2);        
         #call tensG(tarC2,tarC4,tk2,tp)
         id tp.tp^n? = pp^n;        
-***************************************************         
+        Multiply intFG/intTxG;        
+        endif;        
+        .sort:intTxG-2;
 
-*       GxT
-        elseif((count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-
-<<<<<<< HEAD
-*          Multiply TensLBL;
-
-=======
->>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
+        if(count(intGxT,1));
         Multiply replace_(tk2, tk1 - [tk1-tk2]);
         #call tensT1(tarC5,[tk1-tk2])
-
+        endif;
+        .sort:intGxT-1;
+        if(count(intGxT,1));
 *       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
         Multiply replace_([tk1-tk2],tk1 - tk2);        
         #call tensG(tarC1,tarC3,tk1,tp)
-        id tp.tp^n? = pp^n;        
-***************************************************         
-        
-<<<<<<< HEAD
-*         else;
-*         if(match(sdim(?a)) == 0)        
-*         id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?/tarC2^n2?/tarC3^n3?/tarC4^n4?/tarC5^n5? = Tab(x,y,n1,n2,n3,n4,n5);
-
+        id tp.tp^n? = pp^n;                
+         Multiply intFG/intGxT;        
         endif;        
-
-       
-=======
-        endif;        
-
->>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
-        endif;
-
-        if(count(sdim,1) == 0) Multiply sdim(0);
-
-<<<<<<< HEAD
-        if(count(tp.tk1,1,tp.tk2,1) > 0) Print "Non subs term: %t";
-
-        if(count(tp.tk1,1,tp.tk2,1) > 0) exit "Numerator not reduced!!!";
-        
-*       Identify simple integrals(tadpoles and facorized) in shifted dimension        
-        #call i2f(`topo')        
-*         #call zeroTFI(`topo')        
-=======
-        if(count(tp.tk1,1,tp.tk2,1) > 0) Print "Numerator term: %t";
-
-        if(count(tp.tk1,1,tp.tk2,1) > 0) exit  "Numerator not reduced!!!";
-        
-*       Identify simple integrals(tadpoles and facorized) in shifted dimension        
-        #call i2f(`topo')        
->>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
-
-        endif;
+        .sort:intGxT-2;
 
         
+**********************************************************************************************
+* 
+*       Here we substitute RHS with tables but only for 
+*       fixed maximal power of isp in numerator
+* 
+
+        #$pisp = 0;
+        if ( count(pocoisp,1) > $pisp ) $pisp = count_(pocoisp,1);
+        .sort
+        #write ">>>                            "        
+        #write ">>>   Maximal isp power: `$pisp'"
+        #write ">>>                            "
+
+        #if `$pisp' > `SPMAXRANK'
+                #write "ERROR:Irreducible sp table weight `SPMAXRANK' is to low";
+                #terminate
+        #endif        
+
+
+        #do xyp = `$pisp',1,-1
+                id pocoisp^`xyp'*tVab2345(x?,y?,n2?,n3?,n4?,n5?) = Vab2345(x,y,n2,n3,n4,n5);
+                .sort:tabV2345-`xyp';                
+                id pocoisp^`xyp'*tVab1345(x?,y?,n1?,n3?,n4?,n5?) = Vab1345(x,y,n1,n3,n4,n5);
+                .sort:tabV1345-`xyp';                
+                id pocoisp^`xyp'*tVab1245(x?,y?,n1?,n2?,n4?,n5?) = Vab1245(x,y,n1,n2,n4,n5);
+                .sort:tabV1245-`xyp';                
+                id pocoisp^`xyp'*tVab1235(x?,y?,n1?,n2?,n3?,n5?) = Vab1235(x,y,n1,n2,n3,n5);
+                .sort:tabV1235-`xyp';                
+
+                id pocoisp^`xyp'*tJab145(x?,y?,n1?,n4?,n5?) = Jab145(x,y,n1,n4,n5);
+                .sort:tabJ145-`xyp';                
+                id pocoisp^`xyp'*tJab235(x?,y?,n2?,n3?,n5?) = Jab235(x,y,n2,n3,n5);
+                .sort:tabJ235-`xyp';                
+
+                id pocoisp^`xyp'*tKab125(x?,y?,n1?,n2?,n5?) = Kab125(x,y,n1,n2,n5);
+                .sort:tabK125-`xyp';                
+                id pocoisp^`xyp'*tKab345(x?,y?,n3?,n4?,n5?) = Kab345(x,y,n3,n4,n5);
+                .sort:tabK345-`xyp';                
+        #enddo                
+
 **********************************************************************************************
         
 *       <3> reduce scalar integrals in arbitrary dimension
@@ -1664,15 +1700,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 .sort:redV-drrV-`$repcount++';
                 #redefine irep "`$irep'"
         #enddo
-        
-<<<<<<< HEAD
-*                 if(match(sdim(dp?pos_)/tarC5^n1?pos_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?pos_)) redefine i "0";     
-*                 endif;
-*                 .sort:redV-drrV;                                
-*         #enddo
-
-=======
->>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
+        #printtimes
 
         if(count(int`topo',1));
         #call i2f(`topo')        
@@ -1706,32 +1734,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 .sort:redJ-drrJ-`$repcount++';
                 #redefine irep "`$irep'"
         #enddo
-<<<<<<< HEAD
-
-*                 if(match(sdim(dp?pos_)/tarC1^n1?pos_/tarC5^n2?pos_/tarC4^n3?pos_)) redefine i "0";                
-*                 endif;                
-*                 .sort:redJ-drrJ;
-*         #enddo
-        
-
-*         if(match(sdim(0))) Discard;
-        
-        if(count(int`topo',1)) if(match(sdim(dp?pos_))) Print "term: %t";    
-        .sort:Check higher dim ints;
-        if(count(int`topo',1)) if(match(sdim(dp?pos_))) exit "Complicated integrals in higher dimensions";    
-
-*       <5> reduce scalar integrals with fixed dimension        
-
-*         #do i=1,1       
-*                 if(count(int`topo',1));
-*                 #call redF
-
-*                 id,only 1/tarC1/tarC2/tarC3/tarC4/tarC5 = TFI(1,1,1,1,1);                
-*                 if((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0)) redefine i "0";
-*                 endif;                
-*                 .sort:redF-noshift;                
-*         #enddo
-=======
+        #printtimes
         
         if(count(int`topo',1)) if(match(sdim(dp?pos_))) Print "term: %t";    
         if(count(int`topo',1)) if(match(sdim(dp?pos_))) exit "Complicated integrals in higher dimensions";    
@@ -1760,7 +1763,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 .sort:redF-noshift-`$repcount++';
                 #redefine irep "`$irep'"
         #enddo
-
+        #printtimes
 
 <<<<<<< HEAD
 *         #call zeroTFI        
@@ -1796,22 +1799,9 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 .sort:redV-noshift-`$repcount++';
                 #redefine irep "`$irep'"
         #enddo
-
-<<<<<<< HEAD
-*         #do i=1,1       
-*                 if(count(int`topo',1));
-*                 #call redV
-
-*                 id,only 1/tarC2/tarC3/tarC4/tarC5 = TFI(0,1,1,1,1);                
-*                 if((count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0)) redefine i "0";
-*                 endif;
-*                 .sort:redV-noshift;                
-*         #enddo
-
-*         #call zeroTFI      
-=======
->>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
+        #printtimes
   
+
         if(count(int`topo',1));        
         #call uniqueTJ
         endif;
@@ -1841,20 +1831,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 .sort:redJ-noshift-`$repcount++';
                 #redefine irep "`$irep'"
         #enddo
-        
-<<<<<<< HEAD
-*         #do i=1,1       
-*                 if(count(int`topo',1));
-*                 #call redJ
-
-*                 id,only 1/tarC1^2/tarC4/tarC5 = TFI(2,0,0,1,1);
-*                 id,only 1/tarC1/tarC4/tarC5 = TFI(1,0,0,1,1);                
-*                 if((count(tarC1,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0)) redefine i "0";
-*                 endif;
-*                 .sort:redJ-noshift;                
-*         #enddo
-=======
->>>>>>> b9cdea533f861759d74e6f43f3aa22cf41065c51
+        #printtimes        
 
         if(count(int`topo',1));        
         id sdim(0) = 1;
@@ -1916,21 +1893,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 endif;
                 .sort:drr-T2;
         #enddo
-
-<<<<<<< HEAD
-*         if(count(int`topo',1)) id T2(n1?,n2?,n3?) = T2(0,n1,n2,n3);
-
-* Wrong order red <-> drr ??        
-
-*         #do i=1,1
-*                 if(count(int`topo',1));
-*                 #call drrT2
-*                 if(match(T2(dp?pos_,n1?pos_,n2?pos_,n3?pos_))) redefine i "0";
-*                 endif;
-*                 .sort
-*         #enddo
-
-=======
+        #printtimes
 
 *       Reduce T2        
         #message
@@ -1944,6 +1907,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 endif;
                 .sort:red-T2;
         #enddo
+        #printtimes
 
         if(count(int`topo',1));
         id T2(dp?,n1?pos_,n2?pos_,0) = T1(dp,n1)*T1(dp,n2);
@@ -2014,6 +1978,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         id G(dp?,n1?,0) = T1(dp,n1);
         id G(dp?,0,n2?) = T1(dp,n2);
         endif;
+        #printtimes
 
 <<<<<<< HEAD
 * Now reduce one-loop tadpoles        
@@ -2070,6 +2035,20 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *--#[ sp2den :
 #procedure sp2den(TOPO)
 
+if(count(int`TOPO',1));        
+id p1.p1 = 1 + d1;
+id p2.p2 = 1 + d2;
+id p3.p3 = 1 + d3;
+id p4.p4 = 1 + d4;
+id p5.p5 = 1 + d5;
+id p6.p6 = 1 + d6;
+id p7.p7 = 1 + d7;
+id p8.p8 = 1 + d8;
+id p9.p9 = 1 + d9;
+id p10.p10 = 1 + d10;
+endif;
+.sort:sp2den-pp;
+        
 if(count(int`TOPO',1));
 <<<<<<< HEAD
 id p1.p2 = 1/2 + 1/(2*d1) + 1/(2*d2) - 1/(2*d8);
@@ -11612,19 +11591,32 @@ ModuleOption,minimum,$irep;
         #call mapFG(X)
 
 *       Only after mapping on simpler we start to reduce top level topologies        
+        #message
+        #message reduction X started                 
+        #message
         #call redX
         #call mapBMW(X)
         #call mapFG(X)
 
         #call mapBMW(H)
         #call mapFG(H)
+        #printtimes
+
+
+        #message
+        #message reduction H started                 
+        #message
         #call redH
+        #printtimes
 
         #call mapBMW(H)
         #call mapFG(H)
+        #message
+        #message reduction BMW started                 
+        #message
         #call redBMW
         #call mapFG(BMW)
-
+        #printtimes
         
         if(count(intX,1,intH,1,intBMW,1) > 0);
         exit "High-level topologies X,H,BMW not reduced";
@@ -11635,9 +11627,14 @@ ModuleOption,minimum,$irep;
 *       Improved power expand in numerator        
         id num(x?,y?)=x^y;
         .sort:mapFG;
-        
-        #call redFG
 
+
+        
+        #message
+        #message reduction FG started                 
+        #message
+        #call redFG
+        #printtimes
 *       Numerator reduction is based on topology with (pp^n5)        
 
 *       Integrals with denominator with power n5 now have argument (n5), n5 > 0
@@ -11790,6 +11787,7 @@ ModuleOption,minimum,$irep;
         #call rec1dm1
         #call rec1dm0
         #call rec1dnum
+        #printtimes
         .sort:rec1d-done;
 
 
@@ -12164,14 +12162,14 @@ ModuleOption,minimum,$irep;
           - 4/3*z3
           )
 
+       + PR9ep0
+
        + ep * (
           + PR9ep1
           )
 
-       + PR9ep0
-
-       + ep * (
-          Oep(1,PR9)
+       + ep^2 * (
+          Oep(2,PR9)
           )
         ;
 
@@ -12199,14 +12197,14 @@ ModuleOption,minimum,$irep;
           + 29/9*z3
           )
 
+       + PR9dep0
+
        + ep * (
           + PR9dep1
           )
 
-       + PR9dep0
-
-       + ep * (
-          Oep(1,PR9d)
+       + ep^2 * (
+          Oep(2,PR9d)
           )
         ;
 
