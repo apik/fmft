@@ -1,4 +1,4 @@
-# FMFT-Fully Massive Four-loop Tadpoles
+# FMFT-Fully Massive Four-loop Tadpoles [![Build Status](https://travis-ci.org/apik/fmft.svg)](https://travis-ci.org/apik/fmft)
 
 **FMFT** is a [FORM](https://github.com/vermaseren/form) package for
 reduction fully masive four-loop tadpole integrals to set of master
