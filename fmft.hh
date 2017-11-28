@@ -101,7 +101,7 @@ V tk4,mtk4,mtp;
 S intFMFT,intX,intH,intBMW,intFG,int1d;
 
 * TOPO symbols for red2l reduction
-S intF,intV,intJ,intT2,intGxG,intGxT,intTxG;
+S intF,intV,intJ,intT2,intGxG,intGxT,intTxG,intTxT;
 
 * averts
 S [sqrt(x)],[x],n,s;
@@ -7863,7 +7863,8 @@ ModuleOption,minimum,$irep;
 
 * Reduce two-loop tadpole by hand
 #procedure red2l
-        Multiply sdim(0)*intF/intFG;
+
+        if(count(intFG,1)) Multiply sdim(0)*intF/intFG;
 
 
         #message
@@ -7926,28 +7927,45 @@ id tarC3^n3?pos_ = (tk1.tk1 - 2*tk1.tp + pp - tmm)^n3;
 id tarC4^n4?pos_ = (tk2.tk2 - 2*tk2.tp + pp - tmm)^n4;
 id tarC5^n5?pos_ = (tk1.tk1 - 2*tk1.tk2 + tk2.tk2 - tmm)^n5;
 
+
 * all tarC in num con to SP !!!        
 #call spcontract1(T2,1)
+
 
 if((count(tarC1,-1) == 0) && (count(tarC3,-1) == 0)) Multiply replace_(intT2,intTxG);
 if((count(tarC2,-1) == 0) && (count(tarC4,-1) == 0)) Multiply replace_(intT2,intGxT);
 
 #call redTad125(T2)
 
+
+
 * Now reduce remaining low powers of (k1.p) and (k2.p)
 * eq B.10 in Davydychev, Smirnov, Tausk 
 * Nucl.Phys. B410 (1993) 325-342
 
+if(count(intT2,1));
 id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC5^n5? = 
 mod_(x+y+1,2)*(1/2)^(x+y)*fac_(x)*fac_(y)*pp^((x+y)/2)*PochhammerINV((x+y)/2,d/2)*
 sum_(j3,0,min_(x,y),
 mod_(x-j3+1,2)*mod_(y-j3+1,2)*tk1.tk1^((x-j3)/2)*tk2.tk2^((y-j3)/2)*(2*tk1.tk2)^j3*invfac_((x-j3)/2)*invfac_((y-j3)/2)*invfac_(j3))/tarC1^n1/tarC2^n2/tarC5^n5;
-
+endif;
 * id tk1.tk1^n?pos_ = (tarC1 + tmm)^n;
 * id tk2.tk2^n?pos_ = (tarC2 + tmm)^n;
 * id tk1.tk2^n?pos_ = ((tarC1 + tarC2 - tarC5 + tmm)/2)^n;
 
 #call spcontract1(T2,1)
+
+
+
+* T2=125        
+if((count(tarC3,-1) == 0) && (count(tarC4,-1) == 0) && (count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC5,-1) == 0)) Multiply replace_(intT2,intTxT);
+if((count(tarC3,-1) == 0) && (count(tarC4,-1) == 0) && (count(tarC1,-1) > 0) && (count(tarC2,-1) == 0) && (count(tarC5,-1) > 0)) Multiply replace_(intT2,intTxT);
+if((count(tarC3,-1) == 0) && (count(tarC4,-1) == 0) && (count(tarC1,-1) == 0) && (count(tarC2,-1) > 0) && (count(tarC5,-1) > 0)) Multiply replace_(intT2,intTxT);
+
+* T2=345        
+if((count(tarC1,-1) == 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) == 0)) Multiply replace_(intT2,intTxT);
+if((count(tarC1,-1) == 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) == 0) && (count(tarC5,-1) > 0)) Multiply replace_(intT2,intTxT);
+if((count(tarC1,-1) == 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1) == 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0)) Multiply replace_(intT2,intTxT);
 
 if(count(tarC1,-1) == 0) Multiply replace_(intT2,intTxG);
 if(count(tarC2,-1) == 0) Multiply replace_(intT2,intGxT);
@@ -7976,7 +7994,6 @@ if((count(tk1,1) == 0) && (count(tk2,1) == 0)) id intT2/tarC1^n1?pos_/tarC2^n2?p
         
         if(match(T2(dp?,n1?,n2?,n3?))) exit "Unreduced T2";
         endif;
-
 
 #call partfrac
 
@@ -8028,6 +8045,34 @@ if((count(tk1,1) == 0) && (count(tk2,1) == 0)) id intT2/tarC1^n1?pos_/tarC2^n2?p
          Multiply intFG/intGxT;        
         endif;        
         .sort:intGxT-2;
+
+
+*       One-loop tadpoles        
+        if(count(intTxT,1) && (count(tarC1,-1) > 0) && (count(tarC2,-1) > 0));
+        #call tensT1(tarC1,tk1,0)
+        #call tensT1(tarC2,tk2,0)
+*         Multiply replace_(zero,0);
+        Multiply intFG/intTxT;        
+        endif;
+        .sort:intTxT-(12);
+
+        if(count(intTxT,1) && (count(tarC1,-1) > 0) && (count(tarC5,-1) > 0));
+        Multiply replace_(tk2, tk1 - [tk1-tk2]);
+        #call tensT1(tarC1,tk1,0)
+        #call tensT1(tarC5,[tk1-tk2],0)
+*         Multiply replace_(zero,0);
+        Multiply intFG/intTxT;        
+        endif;
+        .sort:intTxT-(15);
+
+        if(count(intTxT,1) && (count(tarC2,-1) > 0) && (count(tarC5,-1) > 0));
+        Multiply replace_(tk1, [tk1-tk2] + tk2);
+        #call tensT1(tarC2,tk2,0)
+        #call tensT1(tarC5,[tk1-tk2],0)
+*         Multiply replace_(zero,0);
+        Multiply intFG/intTxT;        
+        endif;
+        .sort:intTxT-(25);
 
 
 
@@ -8140,6 +8185,7 @@ if((count(tk1,1) == 0) && (count(tk2,1) == 0)) id intT2/tarC1^n1?pos_/tarC2^n2?p
 *       Numerator to scalar products        
         Multiply replace_(d2, k2.k2 - tmm, d10, k1.k1 - 2*k1.k2 + k2.k2 - 2*k1.k3 + 2*k2.k3 + k3.k3 - tmm);
         Multiply replace_(d1,tarC1, d9,tarC2, d4,tarC3, d7,tarC4, d3,tarC5, d5,[pp-tmm]);        
+
 
 *       Inverse powers of denominators to scalar products
         id tarC1^n1?pos_=(k1.k1 - tmm)^n1;
