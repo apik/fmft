@@ -54,19 +54,3 @@ version of **FORM** with 8 workers `tform -w8`. Time format is
 **FIRE** | 0:01:58 | 0:09:10 | 0:28:17 | 2:16:42 | 9:19:57 | 46:42:29
 
 
-## Tables for irreducible scalar products
-
-By default distributed with package and loaded automaticaly tables for
-irreducible scalar products up to weight 10. If higher power of
-irreducible scalar prodocts need to be reduced additional tables can
-be downloaded:
-
-
-[Tables for irreducible scalar products with powers from 11 to 20](https://dl.bintray.com/apik/FMFT/)
-
-To start using them simply unpack archives into directory `isp` and
-before including `fmft.hh` define new maximal rank of tensor
-structures in numerator with directive `#define SPMAXRANK "<WEIGHT>"`,
-where `<WEIGHT>` is a maximal weight of tables you want to load.
-
-
