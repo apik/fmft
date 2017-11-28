@@ -4,7 +4,7 @@ language: generic
 # whitelist
 branches:
   only:
-    - red2l
+    - develop
 
 script:
   - curl -OL https://github.com/vermaseren/form/releases/download/v4.2.0/form-4.2.0-x86_64-linux.tar.gz
