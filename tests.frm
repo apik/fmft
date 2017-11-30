@@ -2,8 +2,6 @@
 Off statistics;
 #include fmft.hh
 
-#call FillGtab
-
 CF fmftint;
 
 #define EXITCODE "0"
