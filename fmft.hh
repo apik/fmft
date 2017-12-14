@@ -226,12 +226,6 @@ numJ1001X11110, numJ1010X01100, numJ1010X11100, numJ1010X01100,
 numJ1010X11100, numJ1011X01110, numJ1011X11110, numJ1011X01110, 
 numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
-
-* #ifndef `NOGTAB'
-* #message Filling tables for G
-* #include intG.tbl
-* #message G(dp,n1,n2) tables filled
-* #endif
 .global
 
 
@@ -7790,9 +7784,13 @@ ModuleOption,minimum,$irep;
         #call uniqueJnew(F)
         #call uniqueT2new(F)
         #call to1l(F)
-*       reduce V        
+*       reduce V
+        #message
+        #message reduce V                
+        #message
         #call red01111
-        #call zeroTFI(V)
+        #printtimes                        
+        #call zeroTFI(V)        
         #call partfrac
 *       rename V
         #call uniqueVnew(V)
@@ -7801,17 +7799,19 @@ ModuleOption,minimum,$irep;
         #call uniqueT2new(V)
         #call to1l(V)
 *       reduce J
+        #message
+        #message reduce J
+        #message        
         #call red01101
+        #printtimes
         #call zeroTFI(J)
         #call partfrac
 *       rename J
         #call uniqueJnew(J)
         id,only intJ/tarC2^2/tarC3/tarC5 = intFG*TFI(2,0,0,1,1);
         id,only intJ/tarC2/tarC3/tarC5   = intFG*TFI(1,0,0,1,1);                
-
         #call uniqueT2new(J)
         #call to1l(J)
-
 *       reduce T2
         id tarC1^n1?pos_ = (tk1.tk1 - tmm)^n1;
         id tarC2^n2?pos_ = (tk2.tk2 - tmm)^n2;
