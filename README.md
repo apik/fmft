@@ -6,6 +6,10 @@ integrals. For correct operation **FMFT** needs last [development
 version of FORM](https://github.com/vermaseren/form) or at least
 **FORM** version 4 available as precompiled binary.
 
+If you use these software, please cite corresponding CPC paper:
+
+*[FMFT: Fully Massive Four-loop Tadpoles](http://inspirehep.net/record/1608891)
+By Andrey Pikelner*
 
 ## Basic topologies
 
@@ -48,7 +52,7 @@ version of **FORM** with 8 workers `tform -w8`. Time format is
 *hh:mm:ss*
 
 
- N       | 3       |4        |5        |6        |7        |8
+ N       | 3       | 4       | 5       | 6       | 7       | 8
 ---------|---------|---------|---------|---------|---------|---------
 **FMFT** | 0:00:11 | 0:00:27 | 0:01:55 | 0:07:35 | 0:25:31 | 01:30:31
 **FIRE** | 0:01:58 | 0:09:10 | 0:28:17 | 2:16:42 | 9:19:57 | 46:42:29
