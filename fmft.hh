@@ -334,81 +334,6 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 *--#] spcontract1 :
 
 
-* Here we cancel each scalar product with its corresponding denominator
-*--#[ spcontract1old :
-#procedure spcontract1old(topo,nc)
-* 
-* 
-*       Red SP 1
-* 
-*         
-
-        #$repcount = 1;                
-        #do irep=1,1       
-                #$irep = 1;
-                if(count(int`topo',1));
-                
-*               (tk1^1)--
-                if(count(tk1.tk1,1) > count(tarC1,-1));
-                id,ifmatch->sortsp tk1.tk1^v?pos_*tk2.tk2^w?*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?/tarC1^n1?pos_/tarC2^n2?/tarC3^n3?/tarC4^n4?/tarC5^n5? =
-                sum_(i, 0, n1, (tarC1^(i - n1)*tk1.tk1^(-n1 + v)*tk1.tk2^z*tk2.tk2^w*(tmm)^(-i + n1)*tp.tk1^x*tp.tk2^y*binom_(n1, i))/(tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5));
-                endif;
-                
-                if(count(tk1.tk1,1) <= count(tarC1,-1));
-                id,ifmatch->sortsp tk1.tk1^v?pos_*tk2.tk2^w?*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?/tarC1^n1?pos_/tarC2^n2?/tarC3^n3?/tarC4^n4?/tarC5^n5? =
-                sum_(i, 0, v, (tarC1^(i - n1)*tk1.tk2^z*tk2.tk2^w*(tmm)^(-i + v)*tp.tk1^x*tp.tk2^y*binom_(v, i))/(tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5));
-                endif;
-                
-                
-                
-*               (tk2^2)--
-                if(count(tk2.tk2,1) > count(tarC2,-1));
-                id,ifmatch->sortsp tk1.tk1^v?*tk2.tk2^w?pos_*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?/tarC1^n1?/tarC2^n2?pos_/tarC3^n3?/tarC4^n4?/tarC5^n5? =
-                sum_(i, 0, n2, (tarC2^(i - n2)*tk1.tk1^v*tk1.tk2^z*tk2.tk2^(-n2 + w)*(tmm)^(-i + n2)*tp.tk1^x*tp.tk2^y*binom_(n2, i))/(tarC1^n1*tarC3^n3*tarC4^n4*tarC5^n5));
-                endif;
-                
-                
-                if(count(tk2.tk2,1) <= count(tarC2,-1));
-                id,ifmatch->sortsp tk1.tk1^v?*tk2.tk2^w?pos_*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?/tarC1^n1?/tarC2^n2?pos_/tarC3^n3?/tarC4^n4?/tarC5^n5? =
-                sum_(i, 0, w, (tarC2^(i - n2)*tk1.tk1^v*tk1.tk2^z*(tmm)^(-i + w)*tp.tk1^x*tp.tk2^y*binom_(w, i))/(tarC1^n1*tarC3^n3*tarC4^n4*tarC5^n5));
-                endif;
-                
-                
-* <-4->         (tp.tk1)--
-                id,ifmatch->sortsp tk1.tk1^v?*tk2.tk2^w?*tp.tk1^x?pos_*tp.tk2^y?*tk1.tk2^z?/tarC1^n1?pos_/tarC2^n2?/tarC3^n3?pos_/tarC4^n4?/tarC5^n5? =
-                - (tarC3^(1 - n3)*tk1.tk1^v*tk1.tk2^z*tk2.tk2^w*tp.tk1^(-1 + x)*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC4^n4*tarC5^n5)
-                + (tk1.tk1^(1 + v)*tk1.tk2^z*tk2.tk2^w*tp.tk1^(-1 + x)*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5)
-                + (tk1.tk1^v*tk1.tk2^z*tk2.tk2^w*(-tmm + pp)*tp.tk1^(-1 + x)*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5);
-                
-* <-5->         (tp.tk2)--
-                id,ifmatch->sortsp tk1.tk1^v?*tk2.tk2^w?*tp.tk1^x?*tp.tk2^y?pos_*tk1.tk2^z?/tarC1^n1?/tarC2^n2?pos_/tarC3^n3?/tarC4^n4?pos_/tarC5^n5? =
-                - (tarC4^(1 - n4)*tk1.tk1^v*tk1.tk2^z*tk2.tk2^w*tp.tk1^x*tp.tk2^(-1 + y))/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC5^n5)
-                + (tk1.tk1^v*tk1.tk2^z*tk2.tk2^(1 + w)*tp.tk1^x*tp.tk2^(-1 + y))/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5)
-                + (tk1.tk1^v*tk1.tk2^z*tk2.tk2^w*(-tmm + pp)*tp.tk1^x*tp.tk2^(-1 + y))/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5);
-                
-*               (tk1.tk2)--
-                id,ifmatch->sortsp tk1.tk1^v?*tk2.tk2^w?*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?pos_/tarC1^n1?/tarC2^n2?/tarC3^n3?/tarC4^n4?/tarC5^n5?pos_ =
-                - (tarC5^(1 - n5)*tk1.tk1^v*tk1.tk2^(-1 + z)*tk2.tk2^w*tp.tk1^x*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4)
-                + (tk1.tk1^(1 + v)*tk1.tk2^(-1 + z)*tk2.tk2^w*tp.tk1^x*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5)
-                + (tk1.tk1^v*tk1.tk2^(-1 + z)*tk2.tk2^(1 + w)*tp.tk1^x*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5)
-                - (tk1.tk1^v*tk1.tk2^(-1 + z)*tk2.tk2^w*tmm*tp.tk1^x*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5);
-                
-                
-                
-                endif;
-                goto endrec;                
-                la sortsp;
-                $irep = 0;
-                la endrec;
-                
-                ModuleOption,minimum,$irep;
-                .sort:red-SP1-`nc'-`$repcount++';
-                #redefine irep "`$irep'"
-        #enddo        
-#endprocedure
-*--#] spcontract1old :
-
-
 
 * We reduce all k1.p and k2.p to C1C2C5
 #procedure redTad125(topo)
@@ -670,10 +595,15 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 la sortme;
                 $irep = 0;
                 la endrec;
-                
-                ModuleOption,minimum,$irep;
+
+                b pp,[pp-4*tmm];
+                ModuleOption,minimum,$irep;                
                 .sort:redG-`$repcount++';
                 #redefine irep "`$irep'"
+                Keep Brackets;
+                ratio [pp-4*tmm],pp,mden;        
+                Multiply replace_(mden,4*tmm);
+                .sort                
         #enddo
 #endprocedure
 *--#] redG :
@@ -700,6 +630,9 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 #procedure partfrac
 * Do partial fractioning for propagators connecting 
 * two-loop diagram with one-loop
+        b pp,[pp-tmm],[pp-3*tmm],[pp-4*tmm],[pp-9*tmm];
+        .sort
+        Keep Brackets;        
 *       [pp]        
         #do ms={tmm,3*tmm,4*tmm,9*tmm}
                 ratio [pp-`ms'],pp,mden;        
@@ -717,7 +650,8 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         #enddo
 *       [pp-4ms]                
         ratio [pp-9*tmm],[pp-4*tmm],mden;        
-        Multiply replace_(mden,5*tmm);      
+        Multiply replace_(mden,5*tmm);
+        .sort        
 #endprocedure        
 *--#] partfrac :
 
@@ -7470,6 +7404,8 @@ num(-1 + pp + tk1.tk1 - 2*tk1.tk2 + 2*tk1.tk4 - 2*tk1.tp + tk2.tk2 - 2*tk2.tk4 +
 #$repcount = 1;        
 #do irep=1,1
 #$irep = 1;                
+* do not need partfrac=1        
+#$nopf = 1;                        
 if(count(intV,1));
 
 *   n1 != 0 && n5 != 1
@@ -7509,7 +7445,7 @@ id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?pos_/tarC3^n3?{>1}/tarC4^n4?pos_/ta
 
 
 *   n1 == 0 && n2 != 1 && n2 != 2 && n3 == 1 && n4 == 1 && n5 == 1
-        if((count(tarC1,-1)) == 0) id,only,ifmatch->sortme 1/tarC2^n2?{>2}/tarC3/tarC4/tarC5 =
+        if((count(tarC1,-1)) == 0) id,only,ifmatch->dopartfrac 1/tarC2^n2?{>2}/tarC3/tarC4/tarC5 =
 (1/(2*pp) + 1/(2*[pp-4*tmm]))/(tarC2^n2*tarC3*tarC5) + (tarC2^(1 - n2)*(-1/(2*(-1 + n2)*pp) - 1/(2*(-1 + n2)*[pp-4*tmm])))/(tarC3^2*tarC4) + (tarC2^(2 - n2)*(-1/(4*(-1 + n2)*pp) + 1/(4*(-1 + n2)*[pp-4*tmm])))/(tarC3^2*tarC4*tarC5) + (tarC2^(1 - n2)*(1/(4*(-1 + n2)*pp) + 3/(4*(-1 + n2)*[pp-4*tmm])))/(tarC3^2*tarC5) + (tarC2^(2 - n2)*(1/((-2 + n2)*(-1 + n2)*pp) - 1/((-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3^3*tarC4) + (tarC2^(2 - n2)*(1/(2*(-2 + n2)*(-1 + n2)*pp) - 1/(2*(-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3^2*tarC5^2) + (tarC2^(2 - n2)*(-1/(2*(-2 + n2)*(-1 + n2)*pp) + 1/(2*(-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3^2*tarC4^2) + (tarC2^(2 - n2)*(-1/(2*(-2 + n2)*(-1 + n2)*pp) + 1/(2*(-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3*tarC4*tarC5^2) + (tarC2^(2 - n2)*(-(1/((-2 + n2)*(-1 + n2)*pp)) + 1/((-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3^3*tarC5) + (tarC2^(2 - n2)*((3 - n2)/(2*(-2 + n2)*(-1 + n2)*pp) + (-3 + n2)/(2*(-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3*tarC4^2*tarC5) + (tarC2^(1 - n2)*((3 - n2)/(2*(-1 + n2)*pp) + (-3 + n2 - 2*rat(-2 + d - n2, 1))/(2*(-1 + n2)*[pp-4*tmm])))/(tarC3*tarC4*tarC5);
 
 
@@ -7521,19 +7457,25 @@ id,only,ifmatch->sortme 1/tarC1^n1?neg_/tarC2/tarC3/tarC4/tarC5 =
 
 
 *   n1 == 0 && n2 == 2 && n3 == 1 && n4 == 1 && n5 == 1
-if((count(tarC1,-1)) == 0) id,only,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^2/tarC3/tarC4/tarC5 = 
+if((count(tarC1,-1)) == 0) id,only,ifmatch->dopartfrac 1/tarC1^n1?neg0_/tarC2^2/tarC3/tarC4/tarC5 = 
 rat(1, -3 + d)/(2*tarC2^2*tarC3^2*tarC4) + rat(1, -3 + d)/(2*tarC2^2*tarC4*tarC5^2) - rat(1, -3 + d)/(2*tarC2*tarC3*tarC5^2*[pp-4*tmm]) + rat(1, -3 + d)/(2*tarC2*tarC4*tarC5^2*[pp-4*tmm]) - (2*tmm*rat(1, -3 + d))/(tarC2*tarC3^3*tarC4*[pp-4*tmm]) - (2*tmm*rat(1, -3 + d))/(tarC2*tarC3*tarC5^3*[pp-4*tmm]) + (2*tmm*rat(1, -3 + d))/(tarC2*tarC4*tarC5^3*[pp-4*tmm]) + (2*tmm*rat(1, -3 + d))/(tarC2*tarC3^3*tarC5*[pp-4*tmm]) + ((-3*tmm*rat(1, -3 + d))/(4*pp) + (3*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC3*tarC4^2*tarC5^2) + ((-3*tmm*rat(1, -3 + d))/(4*pp) + (3*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC3^2*tarC4*tarC5^2) + ((-3*tmm*rat(1, -3 + d))/(4*pp) + (3*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC3^2*tarC4^2*tarC5) + (-rat(1, -3 + d)/2 + (3*tmm*rat(1, -3 + d))/(4*pp) + (3*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC2^2*tarC3*tarC5^2) + (-rat(1, -3 + d)/2 + (3*tmm*rat(1, -3 + d))/(4*pp) + (3*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC2^2*tarC3^2*tarC5) + ((3*tmm*rat(1, -3 + d))/(4*pp) + (9*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC2*tarC3^2*tarC5^2) - rat(-3 + d, 1)/(tarC2*tarC3*tarC4*tarC5*[pp-4*tmm]) + rat(-7 + 2*d, -3 + d)/(2*tarC2*tarC3^2*tarC4*[pp-4*tmm]) - rat(-7 + 2*d, -3 + d)/(2*tarC2*tarC3^2*tarC5*[pp-4*tmm]);
 
 
 endif;
 
+* End recursion
 goto endrec;         
+la dopartfrac;
+$nopf = 0;
 la sortme;
 $irep = 0;
 la endrec;
         
-ModuleOption,minimum,$irep;
+ModuleOption,minimum,$irep,$nopf;
 .sort:red2l-V-`$repcount++';
+#if `$nopf'==0
+        #call partfrac        
+#endif                
 #redefine irep "`$irep'"
 #enddo
 #endprocedure
@@ -7543,7 +7485,9 @@ ModuleOption,minimum,$irep;
 #procedure red01101
 #$repcount = 1;        
 #do irep=1,1
-#$irep = 1;                
+#$irep = 1;
+* do not need partfrac=1        
+#$nopf = 1;                        
 if(count(intJ,1));
 
 *   n4 != 0 && n5 != 1
@@ -7589,7 +7533,7 @@ if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,ifmatch->sortme 1/tarC2^
 
 
 *   n1 == 0 && n4 == 0 && n5 == 2 && n3 != 1
-if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->sortme 1/tarC2^n2?pos_/tarC3^n3?{>1}/tarC5^2 =
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->dopartfrac 1/tarC2^n2?pos_/tarC3^n3?{>1}/tarC5^2 =
 tarC2^(1 - n2)/(tarC3^n3*tarC5^2*[pp-3*tmm]) + (2*n2*tarC2^(-1 - n2)*tarC3^(1 - n3)*tmm)/((-1 + n3)*tarC5^2*[pp-3*tmm]) + (2*n3*tarC3^(-1 - n3)*tmm)/(tarC2^n2*tarC5*[pp-3*tmm]) + (2*n2*tarC2^(-1 - n2)*tmm)/(tarC3^n3*tarC5*[pp-3*tmm]) - rat(-1 + 2*d - 2*n2 - 2*n3, 1)/(tarC2^n2*tarC3^n3*tarC5*[pp-3*tmm]) - (tarC3^(1 - n3)*rat(1 + d - 2*n2 - n3, 1))/((-1 + n3)*tarC2^n2*tarC5^2*[pp-3*tmm]);
 
 
@@ -7607,19 +7551,19 @@ id,only,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2/tarC3/tarC4^n4?neg_/tarC5 =
 
 
 *   n1 == 0 && n3 == 1 && n4 == 0 && n5 == 2 && n2 != 1
-if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,ifmatch->sortme 1/tarC2^n2?{>1}/tarC3/tarC5^2 =
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,ifmatch->dopartfrac 1/tarC2^n2?{>1}/tarC3/tarC5^2 =
 (n2*tarC2^(-1 - n2))/(tarC3*tarC5) - (2*tarC2^(1 - n2))/((-1 + n2)*tarC5^3*[pp-tmm]) - (2*tarC2^(2 - n2))/((-1 + n2)*tarC3*tarC5^3*[pp-tmm]) + (tarC2^(2 - n2)*rat(-4 + d, 1))/(2*(-1 + n2)*tarC3*tarC5^2*tmm*[pp-tmm]) - (tarC2^(1 - n2)*rat((-3 + d)*(3*d - 4*n2), 1))/(2*(-1 + n2)*tarC3*tarC5*tmm*[pp-tmm]) + (-rat(d - 2*n2, 1)/(2*tmm) + (-rat(d - 2*n2, 1) + rat(-6 + 3*d - 2*n2, 1))/(2*[pp-tmm]))/(tarC2^n2*tarC3*tarC5) + (tarC2^(1 - n2)*rat(-1 + d - n2, 1))/((-1 + n2)*tarC3*tarC5^2*[pp-tmm]) + (2*tarC2^(1 - n2)*rat(-1 + d - n2, 1))/((-1 + n2)*tarC3^2*tarC5*[pp-tmm]) + (tarC2^(1 - n2)*rat(-1 + d - n2, 1))/((-1 + n2)*tarC5^2*tmm*[pp-tmm]);
 
 
 
 *   n1 == 0 && n3 == 2 && n4 == 0 && n5 == 1 && n2 != 1
-if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->sortme 1/tarC2^n2?{>1}/tarC3^2/tarC5 =
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->dopartfrac 1/tarC2^n2?{>1}/tarC3^2/tarC5 =
 (n2*tarC2^(-1 - n2))/(tarC3*tarC5) + (-1/(2*tmm) + 1/(2*[pp-tmm]))/(tarC2^n2*tarC3^2) + (tarC2^(1 - n2)*(1/((-1 + n2)*tmm) + 1/((1 - n2)*[pp-tmm])))/tarC3^3 - (tarC1*tarC2^(1 - n2))/((-1 + n2)*tarC3^3*tmm*[pp-tmm]) + tarC4/(2*tarC2^n2*tarC3^2*tmm*[pp-tmm]) + ((rat(-2 + 3*d - 4*n2, 1) - rat(d - 2*n2, 1))/(2*[pp-tmm]) - rat(d - 2*n2, 1)/(2*tmm))/(tarC2^n2*tarC3*tarC5) + (2*tarC2^(1 - n2)*rat(-1 + d - n2, 1))/((-1 + n2)*tarC3*tarC5^2*[pp-tmm]) + (tarC2^(1 - n2)*rat(-1 + d - n2, 1))/((-1 + n2)*tarC3^2*tarC5*[pp-tmm]) + (tarC2^(1 - n2)*rat(-1 + d - n2, 1))/(2*(-1 + n2)*tarC3^2*tmm*[pp-tmm]) - (tarC2^(1 - n2)*rat((-4 + 3*d - 2*n2)*(-1 + d - n2), 1))/(2*(-1 + n2)*tarC3*tarC5*tmm*[pp-tmm]);
 
 
 
 *   n1 == 0 && n2 != 1 && n2 != 2 && n3 == 1 && n4 == 0 && n5 == 1
-if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->sortme 1/tarC2^n2?{>2}/tarC3/tarC5 =
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->dopartfrac 1/tarC2^n2?{>2}/tarC3/tarC5 =
 (-1/(2*tmm) + 1/(4*[pp-tmm]) - 7/(4*[pp-9*tmm]))/(tarC2^n2*tarC3) + (tarC2^(1 - n2)*(-1/(4*(-1 + n2)*[pp-tmm]) + 1/(4*(-1 + n2)*[pp-9*tmm])))/tarC5^2 + (tarC2^(1 - n2)*(1/(2*(-1 + n2)*tmm) - 1/(8*(-1 + n2)*[pp-tmm]) + 13/(8*(-1 + n2)*[pp-9*tmm])))/tarC3^2 + (tarC2^(3 - n2)*(-1/(4*(-2 + n2)*(-1 + n2)*[pp-tmm]) + 1/(4*(-2 + n2)*(-1 + n2)*[pp-9*tmm])))/(tarC3^2*tarC5^2) + (tarC4*(1/(4*tmm*[pp-tmm]) + 1/(4*tmm*[pp-9*tmm])))/(tarC2^n2*tarC3) + (tarC1*tarC2^(1 - n2)*(-3/(8*(-1 + n2)*tmm*[pp-tmm]) - 1/(8*(-1 + n2)*tmm*[pp-9*tmm])))/tarC3^2 + (tarC2^(1 - n2)*((-rat(29*d - 32*n2, 1) + 2*rat(7 + 7*d - 11*n2, 1) - rat(2 + d - 2*n2, 1))/(16*(-1 + n2)*[pp-tmm]) + rat(2 + d - 2*n2, 1)/(2*(-1 + n2)*tmm) + (rat(29*d - 32*n2, 1) - 18*rat(7 + 7*d - 11*n2, 1) + 81*rat(2 + d - 2*n2, 1))/(16*(-1 + n2)*[pp-9*tmm])))/(tarC3*tarC5) + (tarC2^(1 - n2)*((rat(2 + 3*d - 5*n2, 1) - 9*rat(d - n2, 1))/(16*(-1 + n2)*tmm*[pp-9*tmm]) + (-rat(2 + 3*d - 5*n2, 1) + rat(d - n2, 1))/(16*(-1 + n2)*tmm*[pp-tmm])))/tarC3 + (tarC2^(2 - n2)*((rat(-3 + 5*d - 4*n2, 1) - 9*rat(d - n2, 1))/(4*(-2 + n2)*(-1 + n2)*[pp-9*tmm]) + (-rat(-3 + 5*d - 4*n2, 1) + rat(d - n2, 1))/(4*(-2 + n2)*(-1 + n2)*[pp-tmm])))/(tarC3*tarC5^2) + (tarC2^(2 - n2)*((rat(-3 + 5*d - 4*n2, 1) - 9*rat(d - n2, 1))/(4*(-2 + n2)*(-1 + n2)*[pp-9*tmm]) + (-rat(-3 + 5*d - 4*n2, 1) + rat(d - n2, 1))/(4*(-2 + n2)*(-1 + n2)*[pp-tmm])))/(tarC3^2*tarC5) + (tarC2^(2 - n2)*((3*rat((-2 + 3*d - 2*n2)*(d - n2), 1))/(8*(-2 + n2)*(-1 + n2)*tmm*[pp-tmm]) + rat((-2 + 3*d - 2*n2)*(d - n2), 1)/(8*(-2 + n2)*(-1 + n2)*tmm*[pp-9*tmm])))/(tarC3*tarC5);
 
 
@@ -7640,13 +7584,19 @@ if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->sortme 1/t
 
 endif;
 
-goto endrec;         
+* End recursion
+goto endrec;
+la dopartfrac;
+$nopf = 0;
 la sortme;
 $irep = 0;
 la endrec;
         
-ModuleOption,minimum,$irep;
+ModuleOption,minimum,$irep,$nopf;
 .sort:red2l-J-`$repcount++';
+#if `$nopf'==0
+        #call partfrac        
+#endif                
 #redefine irep "`$irep'"
 #enddo
 #endprocedure
@@ -7763,20 +7713,23 @@ ModuleOption,minimum,$irep;
                 #call redF
                 id,only intF/tarC1/tarC2/tarC3/tarC4/tarC5 = intFG*TFI(1,1,1,1,1);                
                 endif;
-                
+*                 #breakdo
                 goto endrec;
                 la dopartfrac;
-                #call partfrac                                       
+*                 #call partfrac
                 $irep = 0;
                 la endrec;
                 
                 ModuleOption,minimum,$irep;
                 .sort:redF-noshift-`$repcount++';
+                #if `$irep'==0
+                        #call partfrac        
+                #endif                                
                 #redefine irep "`$irep'"
         #enddo
         id sdim(0) = 1;        
         #printtimes
-
+        .sort:red-F-done;
 
         #call zeroTFI(F)
 
@@ -7789,7 +7742,8 @@ ModuleOption,minimum,$irep;
         #message reduce V                
         #message
         #call red01111
-        #printtimes                        
+        #printtimes
+        .sort:red-V-done;        
         #call zeroTFI(V)        
         #call partfrac
 *       rename V
@@ -7804,6 +7758,7 @@ ModuleOption,minimum,$irep;
         #message        
         #call red01101
         #printtimes
+        .sort:red-J-done;        
         #call zeroTFI(J)
         #call partfrac
 *       rename J

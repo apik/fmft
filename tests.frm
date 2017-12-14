@@ -18,7 +18,6 @@ Print+s tst`tstnum';
 .sort
 
 #call fmft
-* Multiply replace_(tmm,1);
 
 .sort
 hide tst`tstnum';
@@ -28,12 +27,9 @@ L res`tstnum' =
 ;
 
 .sort
-#write <out-new> "`tstnum'\n %E",res`tstnum'
-.sort
 
 L diff`tstnum' = tst`tstnum' - res`tstnum';
 
-* Print diff`tstnum';
 .sort
 drop tst`tstnum';        
 drop res`tstnum';        
