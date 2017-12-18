@@ -5,7 +5,8 @@ language: generic
 branches:
   only:
     - develop
-
+    - master
+    
 script:
   - curl -OL https://github.com/vermaseren/form/releases/download/v4.2.0/form-4.2.0-x86_64-linux.tar.gz
   - tar -zxf form-4.2.0-x86_64-linux.tar.gz
