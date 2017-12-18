@@ -28,11 +28,9 @@
 * -                                                                           - *
 * ================================== Options ================================== *
 * -                                                                           - *
-* -   NOGTAB - not use tables for dim shift and reduction for G(dp,n1,n2)     - *
+* -           We do not load any other program files and not                  - * 
+* -           need to set any other options in this version                   - * 
 * -                                                                           - *
-* -   SPMAXRANK - maximal power of irreducible numerator for tables           - *
-* -               to be loaded. Tables for 1 to 10 are loaded by default      - *
-* -               and higher powers can be added to directory :isp:           - *
 * -                                                                           - *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -80,9 +78,6 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 
-* By default we use tables for G-functions
-* #define NOGTAB "1"
-
 * Switching off statistics from each thread
 Off threadstats;
 
@@ -103,8 +98,8 @@ V tk4,mtk4,mtp;
 * TOPO symbols
 S intFMFT,intX,intH,intBMW,intFG,int1d;
 
-* TOPO symbols for isp reduction
-S intGxG,intGxT,intTxG;
+* TOPO symbols for red2l reduction
+S intF,intV,intJ,intT2,intGxG,intGxT,intTxG,intTxT;
 
 * averts
 S [sqrt(x)],[x],n,s;
@@ -122,7 +117,7 @@ S PR0ep0,PR12ep0,PR15ep0,z3,ep,D6,z4,PR11ep0,z5,PR11dep0,PR14ep0,S2,z2,T1ep,PR13
 S T2x111,Gx11,T1x1;
 
 S x1,x2,x3;
-
+S j3;
 *
 ****
 * Tarcer declarations
@@ -151,37 +146,7 @@ CF sdim;
 * New denominators
 S [pp-tmm],[pp-3*tmm],[pp-4*tmm],[pp-9*tmm],mm,mden,tmm;
 
-
-* Function corresponding to tables to substitute one by one
-CF tFab12345,tVab2345,tVab1345,tVab1245,tVab1235,tJab145,tJab235,tKab125,tKab345;
-S pocoisp;
-
-Table,sparse,Fab12345(2,n1?,n2?,n3?,n4?,n5?);
-
-Table,sparse,Vab2345(2,n2?,n3?,n4?,n5?);
-Table,sparse,Vab1345(2,n1?,n3?,n4?,n5?);
-Table,sparse,Vab1245(2,n1?,n2?,n4?,n5?);
-Table,sparse,Vab1235(2,n1?,n2?,n3?,n5?);
-
-Table,sparse,Jab145(2,n1?,n4?,n5?);
-Table,sparse,Jab235(2,n2?,n3?,n5?);
-
-Table,sparse,Kab125(2,n1?,n2?,n5?);
-Table,sparse,Kab345(2,n3?,n4?,n5?);
-
-
-#ifndef `NOGTAB'
-Table,Gtab(0:30,1:20,1:20);
-#endif
-
 PolyRatFun rat;
-
-* Maximal rank of tensor structure in numerator
-#ifndef `SPMAXRANK'
-#define SPMAXRANK "10"
-#endif
-
-
 
 
 * One dim rec rel 
@@ -261,45 +226,6 @@ numJ1001X11110, numJ1010X01100, numJ1010X11100, numJ1010X01100,
 numJ1010X11100, numJ1011X01110, numJ1011X11110, numJ1011X01110, 
 numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
-
-*--#[ fillnumred :
-#procedure fillnumred(RANK)
-        #include isp/ispV2345w1to10
-        #include isp/ispV1345w1to10
-        #include isp/ispV1245w1to10
-        #include isp/ispV1235w1to10
-
-        #include isp/ispJ145w1to10
-        #include isp/ispJ235w1to10
-
-        #include isp/ispK125w1to10
-        #include isp/ispK345w1to10
-
-        #do w=11,`RANK'
-                #include isp/ispV2345w`w'
-                #include isp/ispV1345w`w'
-                #include isp/ispV1245w`w'
-                #include isp/ispV1235w`w'
-                
-                #include isp/ispJ145w`w'
-                #include isp/ispJ235w`w'
-                
-                #include isp/ispK125w`w'
-                #include isp/ispK345w`w'                
-        #enddo                
-#endprocedure
-*--#] fillnumred :
-
-#message Filling tables up to rank `SPMAXRANK'
-#call fillnumred(`SPMAXRANK')
-#message isp tables filled
-
-#ifndef `NOGTAB'
-#message Filling tables for G
-#include intG.tbl
-#message G(dp,n1,n2) tables filled
-#endif
-
 .global
 
 
@@ -309,11 +235,11 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 * If facet shrinked to point integral is zero
 * 3 edges
 #procedure dzero3(N1,N2,N3)
-        if((count(tarC`N1',-1) == 0) && (count(tarC`N2',-1) == 0) && (count(tarC`N3',-1) == 0)) Discard;
+        if((count(tarC`N1',-1) <= 0) && (count(tarC`N2',-1) <= 0) && (count(tarC`N3',-1) <= 0)) Discard;
 #endprocedure        
 * 4 edges
 #procedure dzero4(N1,N2,N3,N4)
-        if((count(tarC`N1',-1) == 0) && (count(tarC`N2',-1) == 0) && (count(tarC`N3',-1) == 0) && (count(tarC`N4',-1) == 0)) Discard;
+        if((count(tarC`N1',-1) <= 0) && (count(tarC`N2',-1) <= 0) && (count(tarC`N3',-1) <= 0) && (count(tarC`N4',-1) <= 0)) Discard;
 #endprocedure        
 *--#] dzero :
 
@@ -330,6 +256,21 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         endif;        
 #endprocedure        
 *--#] zeroTFI :
+
+
+
+#procedure GGdecouple(topo)
+*       <-9->        
+*       B()*B()
+*       Gamma[k + a_] -> Po[a, k]*Gamma[a]
+        if(count(int`topo',1));
+        if(count(tarC5,-1) == 0);
+        id tk1.tk1^v?*tk2.tk2^w?*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?pos_/tarC1^n1?/tarC2^n2?/tarC3^n3?/tarC4^n4? =
+        sum_(k, 0, integer_(z/2), sum_(i, 0, k, sum_(j, 0, k, sign_(i + j)*tk1.tk1^(i + v)*tk2.tk2^(j + w)*pp^(i + j - z)*tp.tk1^(-2*i + x + z)*tp.tk2^(-2*j + y + z)*binom_(k, i)*binom_(k, j)*binom_(z, 2*k)*Pochhammer(k,1/2)*PochhammerINV(k,-1/2 + d/2)/(tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4))));
+        endif;
+        endif;        
+#endprocedure
+
 
 * Here we cancel each scalar product with its corresponding denominator
 *--#[ spcontract1 :
@@ -368,29 +309,16 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 if(count(tk2.tk2,1) <= count(tarC2,-1));
                 id,ifmatch->sortsp tk1.tk1^v?*tk2.tk2^w?pos_*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?/tarC1^n1?/tarC2^n2?pos_/tarC3^n3?/tarC4^n4?/tarC5^n5? =
                 sum_(i, 0, w, (tarC2^(i - n2)*tk1.tk1^v*tk1.tk2^z*(tmm)^(-i + w)*tp.tk1^x*tp.tk2^y*binom_(w, i))/(tarC1^n1*tarC3^n3*tarC4^n4*tarC5^n5));
-                endif;
-                
-                
-* <-4->         (tp.tk1)--
-                id,ifmatch->sortsp tk1.tk1^v?*tk2.tk2^w?*tp.tk1^x?pos_*tp.tk2^y?*tk1.tk2^z?/tarC1^n1?pos_/tarC2^n2?/tarC3^n3?pos_/tarC4^n4?/tarC5^n5? =
-                - (tarC3^(1 - n3)*tk1.tk1^v*tk1.tk2^z*tk2.tk2^w*tp.tk1^(-1 + x)*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC4^n4*tarC5^n5)
-                + (tk1.tk1^(1 + v)*tk1.tk2^z*tk2.tk2^w*tp.tk1^(-1 + x)*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5)
-                + (tk1.tk1^v*tk1.tk2^z*tk2.tk2^w*(-tmm + pp)*tp.tk1^(-1 + x)*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5);
-                
-* <-5->         (tp.tk2)--
-                id,ifmatch->sortsp tk1.tk1^v?*tk2.tk2^w?*tp.tk1^x?*tp.tk2^y?pos_*tk1.tk2^z?/tarC1^n1?/tarC2^n2?pos_/tarC3^n3?/tarC4^n4?pos_/tarC5^n5? =
-                - (tarC4^(1 - n4)*tk1.tk1^v*tk1.tk2^z*tk2.tk2^w*tp.tk1^x*tp.tk2^(-1 + y))/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC5^n5)
-                + (tk1.tk1^v*tk1.tk2^z*tk2.tk2^(1 + w)*tp.tk1^x*tp.tk2^(-1 + y))/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5)
-                + (tk1.tk1^v*tk1.tk2^z*tk2.tk2^w*(-tmm + pp)*tp.tk1^x*tp.tk2^(-1 + y))/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5);
-                
+
+
+
 *               (tk1.tk2)--
                 id,ifmatch->sortsp tk1.tk1^v?*tk2.tk2^w?*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?pos_/tarC1^n1?/tarC2^n2?/tarC3^n3?/tarC4^n4?/tarC5^n5?pos_ =
                 - (tarC5^(1 - n5)*tk1.tk1^v*tk1.tk2^(-1 + z)*tk2.tk2^w*tp.tk1^x*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4)
                 + (tk1.tk1^(1 + v)*tk1.tk2^(-1 + z)*tk2.tk2^w*tp.tk1^x*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5)
                 + (tk1.tk1^v*tk1.tk2^(-1 + z)*tk2.tk2^(1 + w)*tp.tk1^x*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5)
                 - (tk1.tk1^v*tk1.tk2^(-1 + z)*tk2.tk2^w*tmm*tp.tk1^x*tp.tk2^y)/(2*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5);
-                
-                
+                endif;
                 
                 endif;
                 goto endrec;                
@@ -404,77 +332,6 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         #enddo        
 #endprocedure
 *--#] spcontract1 :
-
-
-* 
-* Here we cancel k1.k1 with C3 and k2.k2 with C4
-* 
-*--#[ spcontract2 :
-#procedure spcontract2(topo,nc)
-        #$repcount = 1;                
-        #do irep=1,1       
-                #$irep = 1;
-                if(count(int`topo',1));
-                
-* <-7-> V()
-                if(count(tarC1,-1) == 0);
-                id,ifmatch->sortsp tk1.tk1^v?pos_*tk2.tk2^w?*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?/tarC2^n2?/tarC3^n3?pos_/tarC4^n4?/tarC5^n5? =
-                + (tarC3^(1 - n3)*tk1.tk1^(-1 + v)*tk1.tk2^z*tk2.tk2^w*tp.tk1^x*tp.tk2^y)/(tarC2^n2*tarC4^n4*tarC5^n5)
-                - (tk1.tk1^(-1 + v)*tk1.tk2^z*tk2.tk2^w*(-tmm + pp)*tp.tk1^x*tp.tk2^y)/(tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5)
-                + (2*tk1.tk1^(-1 + v)*tk1.tk2^z*tk2.tk2^w*tp.tk1^(1 + x)*tp.tk2^y)/(tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5);
-                endif;
-                
-                
-                if(count(tarC2,-1) == 0);
-                id,ifmatch->sortsp tk1.tk1^v?*tk2.tk2^w?pos_*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?/tarC1^n1?/tarC3^n3?/tarC4^n4?pos_/tarC5^n5? =
-                + (tarC4^(1 - n4)*tk1.tk1^v*tk1.tk2^z*tk2.tk2^(-1 + w)*tp.tk1^x*tp.tk2^y)/(tarC1^n1*tarC3^n3*tarC5^n5)
-                - (tk1.tk1^v*tk1.tk2^z*tk2.tk2^(-1 + w)*(-tmm + pp)*tp.tk1^x*tp.tk2^y)/(tarC1^n1*tarC3^n3*tarC4^n4*tarC5^n5)
-                + (2*tk1.tk1^v*tk1.tk2^z*tk2.tk2^(-1 + w)*tp.tk1^x*tp.tk2^(1 + y))/(tarC1^n1*tarC3^n3*tarC4^n4*tarC5^n5);
-                endif;
-                
-                
-                endif;
-                goto endrec;                
-                la sortsp;
-                $irep = 0;
-                la endrec;
-                
-                ModuleOption,minimum,$irep;
-                .sort:red-SP2-`nc'-`$repcount++';
-                #redefine irep "`$irep'"
-        #enddo        
-#endprocedure
-*--#] spcontract2 :
-
-
-#procedure GGdecouple(topo)
-*       <-9->        
-*       B()*B()
-*       Gamma[k + a_] -> Po[a, k]*Gamma[a]
-        if(count(int`topo',1));
-        if(count(tarC5,-1) == 0);
-        id tk1.tk1^v?*tk2.tk2^w?*tp.tk1^x?*tp.tk2^y?*tk1.tk2^z?pos_/tarC1^n1?/tarC2^n2?/tarC3^n3?/tarC4^n4? =
-        sum_(k, 0, integer_(z/2), sum_(i, 0, k, sum_(j, 0, k, sign_(i + j)*tk1.tk1^(i + v)*tk2.tk2^(j + w)*pp^(i + j - z)*tp.tk1^(-2*i + x + z)*tp.tk2^(-2*j + y + z)*binom_(k, i)*binom_(k, j)*binom_(z, 2*k)*Pochhammer(k,1/2)*PochhammerINV(k,-1/2 + d/2)/(tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4))));
-        endif;
-        endif;        
-#endprocedure
-
-#procedure convV(topo)
-        if(count(int`topo',1));
-*       <-13-> V()
-        if((count(tk1.tk1,1) == 0) && (count(tk2.tk2,1) == 0) && (count(tp.tk1,1) == 0) && (count(tk1.tk2,1) == 0) && (count(tarC2,-1) == 0));
-        id,ifmatch->sortsp tp.tk2^y?pos_/tarC1^n1?/tarC3^n3?/tarC4^n4?pos_/tarC5^n5? =
-        sum_(i, 0, y, ((-1)^i*pp^(-i + y)*tp.tk2^i*binom_(y, i))/(tarC1^n3*tarC2^n4*tarC3^n1*tarC5^n5));
-        endif;
-
-*       <-14-> V()
-        if((count(tk1.tk1,1) == 0) && (count(tk2.tk2,1) == 0) && (count(tp.tk2,1) == 0) && (count(tk1.tk2,1) == 0) && (count(tarC1,-1) == 0));
-        id,ifmatch->sortsp tp.tk1^x?pos_/tarC2^n2?/tarC3^n3?pos_/tarC4^n4?/tarC5^n5? =
-        sum_(i, 0, x, ((-1)^i*pp^(-i + x)*tp.tk1^i*binom_(x, i))/(tarC1^n3*tarC2^n4*tarC4^n2*tarC5^n5));
-        endif;
-
-        endif;        
-#endprocedure
 
 
 
@@ -538,297 +395,8 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 #endprocedure
 
 
-*--#[ redsp :
-#procedure redsp(topo)
-
-*   <1> first step in the end no 5 prop integrals
-*       with corresponding SP        
-        #call spcontract1(`topo',1)
-        #call zeroTFI(`topo')        
-
-*   <2> decouple k1.k2 when there is no C5       
-        #call GGdecouple(`topo')
-        #call zeroTFI(`topo')        
-
-*   <3> cancel k1.k1/C1 and k2.k2/C2 again        
-        #call spcontract1(`topo',2)
-        #call zeroTFI(`topo')       
- 
-* ----- At this point we have only four propagators and no k1.k2
-*   <4> cancel k1.k1/C3 and k2.k2/C4        
-        #call spcontract2(`topo',2)
-        #call zeroTFI(`topo')       
-
-* ----- Here we have only k1.k1/245 and k2.k2/135 
-*       and 2-loop tadpoles 125 and 345
-*   <5> redce tadpoles 125        
-        #call redTad125(`topo')        
-        #call zeroTFI(`topo')       
-        
-*   <6> cancel k1.k1/C1 k2.k2/C2 and k1.k2/C5 in C125 tadpoles
-        #call spcontract1(`topo',3)
-        #call zeroTFI(`topo')       
-
-*   <7> cancel k1.k2/C1/C2        
-        #call GGdecouple(`topo')
-        #call zeroTFI(`topo')        
-
-*   <8> cancel k1.k1/C1 k2.k2/C2
-        #call spcontract1(`topo',4)
-        #call zeroTFI(`topo')       
-
-* ----- Now we 
-*   <9> convert all 135 and 245 to 124            
-        #call convto124(`topo')
-        #call zeroTFI(`topo')       
-
-*  <10> cancel k1.k2
-        #call GGdecouple(`topo')
-        #call zeroTFI(`topo')        
-
-*  <11> cancel k1.k1/C1 and k2.k2/C2
-        #call spcontract1(`topo',5)
-        #call zeroTFI(`topo')       
-
-*  <12> cancel k2.k2/C4
-        #call spcontract2(`topo',2)
-        #call zeroTFI(`topo')       
-#endprocedure
-
-*--#] redsp :
 
 
-* Not used because we do not have TFI with 
-* irreducible numerator and than no dimension shift
-*--#[ drrF :
-#procedure drrF
-* F11111(d+2)->F11111(d) + V(d+2) + BxB(d+2)
-* eq.50
-        id,only sdim(dp?pos_)/tarC1/tarC2/tarC3/tarC4/tarC5 = 
-        pp*(G(dp, 2, 1)^2*rat(-2, (-4 + d + dp)*(-3 + d + dp)) +
-        G(dp, 1, 1)*G(dp, 3, 1)*rat(-2, (-4 + d + dp)*(-3 + d + dp)) +
-        G(dp, 1, 1)*G(dp, 2, 2)*rat(-1, (-4 + d + dp)*(-3 + d + dp))) +
-        tmm*(G(dp, 2, 1)^2*rat(4, (-4 + d + dp)*(-3 + d + dp)) +
-        G(dp, 1, 1)*G(dp, 2, 2)*rat(4, (-4 + d + dp)*(-3 + d + dp)) +
-        G(dp, 1, 1)*G(dp, 3, 1)*rat(8, (-4 + d + dp)*(-3 + d + dp))) +
-        G(dp, 1, 1)*G(dp, 2, 1)*rat(-2*(-5 + d + dp), (-4 + d + dp)*(-3 + d + dp)) +
-        ((tmm*pp*rat(-1, (-4 + d + dp)*(-3 + d + dp)))/(tarC1*tarC2*tarC3*tarC4*tarC5) +
-        (tmm^2*rat(3, (-4 + d + dp)*(-3 + d + dp)))/(tarC1*tarC2*tarC3*tarC4*tarC5))*sdim(-2 + dp) +
-        (rat(2, -3 + d + dp)/(tarC2*tarC3^2*tarC4*tarC5) +
-        tmm*(rat(-8, (-4 + d + dp)*(-3 + d + dp))/(tarC2^3*tarC3*tarC4*tarC5) +
-        rat(-4, (-4 + d + dp)*(-3 + d + dp))/(tarC2^2*tarC3*tarC4^2*tarC5) +
-        rat(-2, (-4 + d + dp)*(-3 + d + dp))/(tarC2*tarC3^2*tarC4*tarC5^2) +
-        rat(-2, (-4 + d + dp)*(-3 + d + dp))/(tarC2*tarC3^3*tarC4*tarC5) +
-        rat(-1, (-4 + d + dp)*(-3 + d + dp))/(tarC2^2*tarC3^2*tarC4*tarC5) +
-        rat(1, (-4 + d + dp)*(-3 + d + dp))/(tarC2*tarC3^2*tarC4^2*tarC5) +
-        rat(2, (-4 + d + dp)*(-3 + d + dp))/(tarC2*tarC3*tarC4^2*tarC5^2) +
-        rat(2, (-4 + d + dp)*(-3 + d + dp))/(tarC2^2*tarC3*tarC4*tarC5^2)) +
-        pp*(rat(1, (-4 + d + dp)*(-3 + d + dp))/(tarC2^2*tarC3*tarC4^2*tarC5) +
-        rat(1, (-4 + d + dp)*(-3 + d + dp))/(tarC2^2*tarC3^2*tarC4*tarC5) +
-        rat(2, (-4 + d + dp)*(-3 + d + dp))/(tarC2^3*tarC3*tarC4*tarC5)) +
-        rat(2*(-5 + d + dp), (-4 + d + dp)*(-3 + d + dp))/(tarC2^2*tarC3*tarC4*tarC5))*sdim(dp);        
-#endprocedure
-*--#] drrF :
-
-*--#[ drrV :
-#procedure drrV
-
-* Here all V-type integrals converted to standard form without C1
-        if(count(tarC1,-1) == 0);
-* eq.66
-        id,ifmatch->sortme sdim(dp?pos_)/tarC5^n1?{>1}/tarC2^n2?{>1}/tarC3^n3?{>1}/tarC4^n4?pos_=
-        ((tarC3^(1 - n3)*tarC4^(1 - n4)*tarC5^(1 - n1)*rat(1, 4*(-1 + n1)*(-1 + n3)))/(tarC2^n2*pp) +
-        (tarC2^(1 - n2)*tarC5^(1 - n1)*tmm*rat(3, 2*(-1 + n1)*(-1 + n2)))/(tarC3^n3*tarC4^n4*pp) +
-        (tarC3^(1 - n3)*tarC5^(1 - n1)*(rat(-1, 4*(-1 + n1)*(-1 + n3)) +
-        (tmm*rat(3, 2*(-1 + n1)*(-1 + n3)))/pp))/(tarC2^n2*tarC4^n4) +
-        (tarC2^(1 - n2)*tarC3^(1 - n3)*tmm*rat(3, 2*(-1 + n2)*(-1 + n3)))/(tarC4^n4*tarC5^n1*pp) +
-        (tarC2^(2 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4)*tarC5^(1 - n1)*
-        rat(n4, 2*(-1 + n1)*(-1 + n2)*(-1 + n3)))/pp + tarC2^(1 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4)*
-        tarC5^(1 - n1)*(rat(-n4, 2*(-1 + n1)*(-1 + n2)*(-1 + n3)) +
-        (tmm*rat(3*n4, 2*(-1 + n1)*(-1 + n2)*(-1 + n3)))/pp) +
-        (tarC2^(1 - n2)*tarC3^(1 - n3)*tarC5^(1 - n1)*rat(-5 - 6*(d + dp) + 6*n1 + 5*n2 + 6*n3 + 4*n4,
-        4*(-1 + n1)*(-1 + n2)*(-1 + n3)))/(tarC4^n4*pp))*sdim(dp - 2);
-        
-* eq.67
-        id,ifmatch->sortme sdim(dp?pos_)/tarC5^n1?{>2}/tarC2^n2?{>1}/tarC3^n3?pos_/tarC4^n4?pos_=
-        ((tarC5^(2 - n1)*tmm*rat(-1, (-2 + n1)*(-1 + n1)))/(tarC2^n2*tarC3^n3*tarC4^n4*pp) +
-        (tarC2^(2 - n2)*tarC5^(1 - n1)*rat(-1, 2*(-1 + n1)*(-1 + n2)))/(tarC3^n3*tarC4^n4*pp) +
-        (tarC2^(1 - n2)*tarC4^(1 - n4)*tarC5^(1 - n1)*rat(1, 2*(-1 + n1)*(-1 + n2)))/(tarC3^n3*pp) +
-        (tarC2^(1 - n2)*tarC5^(1 - n1)*((tmm*rat(-1, (-1 + n1)*(-1 + n2)))/pp +
-        rat(1, 2*(-1 + n1)*(-1 + n2))))/(tarC3^n3*tarC4^n4) +
-        (tarC2^(1 - n2)*tarC3^(-1 - n3)*tarC5^(2 - n1)*tmm*rat(-n3, (-2 + n1)*(-1 + n1)*(-1 + n2)))/
-        (tarC4^n4*pp) + (tarC2^(1 - n2)*tarC5^(2 - n1)*rat(2 + 2*(d + dp) - 2*n1 - 2*n2 - 2*n3 - n4,
-        2*(-2 + n1)*(-1 + n1)*(-1 + n2)))/(tarC3^n3*tarC4^n4*pp) +
-        (tarC2^(2 - n2)*tarC4^(-1 - n4)*tarC5^(2 - n1)*rat(-n4, 2*(-2 + n1)*(-1 + n1)*(-1 + n2)))/
-        (tarC3^n3*pp) + (tarC2^(1 - n2)*tarC4^(-1 - n4)*tarC5^(2 - n1)*
-        ((tmm*rat(-n4, (-2 + n1)*(-1 + n1)*(-1 + n2)))/pp +
-        rat(n4, 2*(-2 + n1)*(-1 + n1)*(-1 + n2))))/tarC3^n3)*sdim(dp - 2);
-        
-* eq.67 1<->3
-        id,ifmatch->sortme sdim(dp?pos_)/tarC5^n1?pos_/tarC2^n2?{>1}/tarC3^n3?{>2}/tarC4^n4?pos_= 
-        ((tarC2^(2 - n2)*tarC3^(1 - n3)*rat(-1, 2*(-1 + n2)*(-1 + n3)))/(tarC4^n4*tarC5^n1*pp) +
-        (tarC3^(2 - n3)*tmm*rat(-1, (-2 + n3)*(-1 + n3)))/(tarC2^n2*tarC4^n4*tarC5^n1*pp) +
-        (tarC2^(1 - n2)*tarC3^(1 - n3)*tarC4^(1 - n4)*rat(1, 2*(-1 + n2)*(-1 + n3)))/(tarC5^n1*pp) +
-        (tarC2^(1 - n2)*tarC3^(1 - n3)*((tmm*rat(-1, (-1 + n2)*(-1 + n3)))/pp +
-        rat(1, 2*(-1 + n2)*(-1 + n3))))/(tarC4^n4*tarC5^n1) +
-        (tarC2^(1 - n2)*tarC3^(2 - n3)*tarC5^(-1 - n1)*tmm*rat(-n1, (-1 + n2)*(-2 + n3)*(-1 + n3)))/
-        (tarC4^n4*pp) + (tarC2^(1 - n2)*tarC3^(2 - n3)*rat(2 + 2*(d + dp) - 2*n1 - 2*n2 - 2*n3 - n4,
-        2*(-1 + n2)*(-2 + n3)*(-1 + n3)))/(tarC4^n4*tarC5^n1*pp) +
-        (tarC2^(2 - n2)*tarC3^(2 - n3)*tarC4^(-1 - n4)*rat(-n4, 2*(-1 + n2)*(-2 + n3)*(-1 + n3)))/
-        (tarC5^n1*pp) + (tarC2^(1 - n2)*tarC3^(2 - n3)*tarC4^(-1 - n4)*
-        ((tmm*rat(-n4, (-1 + n2)*(-2 + n3)*(-1 + n3)))/pp +
-        rat(n4, 2*(-1 + n2)*(-2 + n3)*(-1 + n3))))/tarC5^n1)*sdim(dp - 2);
-        
-* eq.68
-        id,ifmatch->sortme sdim(dp?pos_)/tarC5^n1?{>1}/tarC2^n2?{>2}/tarC3^n3?pos_/tarC4^n4?pos_= 
-        ((tarC2^(1 - n2)*tarC5^(2 - n1)*rat(-1, 2*(-1 + n1)*(-1 + n2)))/(tarC3^n3*tarC4^n4*pp) +
-        (tarC2^(2 - n2)*tmm*rat(-1, 2*(-2 + n2)*(-1 + n2)))/(tarC3^n3*tarC4^n4*tarC5^n1*pp) +
-        (tarC2^(1 - n2)*tarC3^(1 - n3)*tarC5^(1 - n1)*rat(1, 2*(-1 + n1)*(-1 + n2)))/(tarC4^n4*pp) +
-        (tarC2^(1 - n2)*tarC5^(1 - n1)*rat(1, 4*(-1 + n1)*(-1 + n2)))/(tarC3^n3*tarC4^n4) +
-        (tarC2^(1 - n2)*tarC4^(1 - n4)*tarC5^(1 - n1)*rat(1, 4*(-1 + n1)*(-1 + n2)))/(tarC3^n3*pp) +
-        (tarC2^(2 - n2)*tarC3^(-1 - n3)*tarC5^(1 - n1)*tmm*rat(n3, 2*(-1 + n1)*(-2 + n2)*(-1 + n2)))/
-        (tarC4^n4*pp) + (tarC2^(2 - n2)*tarC5^(1 - n1)*rat(4 - 2*n1 - n2 + 2*n3,
-        4*(-1 + n1)*(-2 + n2)*(-1 + n2)))/(tarC3^n3*tarC4^n4*pp) +
-        (tarC2^(2 - n2)*tarC4^(-1 - n4)*tarC5^(2 - n1)*rat(-n4, 2*(-1 + n1)*(-2 + n2)*(-1 + n2)))/
-        (tarC3^n3*pp) + (tarC2^(2 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4)*tarC5^(1 - n1)*
-        rat(n4, 2*(-1 + n1)*(-2 + n2)*(-1 + n2)))/pp)*sdim(dp - 2);
-        
-* eq.68 1<->3
-        id,ifmatch->sortme sdim(dp?pos_)/tarC5^n1?pos_/tarC2^n2?{>2}/tarC3^n3?{>1}/tarC4^n4?pos_= 
-        ((tarC2^(2 - n2)*tmm*rat(-1, 2*(-2 + n2)*(-1 + n2)))/(tarC3^n3*tarC4^n4*tarC5^n1*pp) +
-        (tarC2^(1 - n2)*tarC3^(2 - n3)*rat(-1, 2*(-1 + n2)*(-1 + n3)))/(tarC4^n4*tarC5^n1*pp) +
-        (tarC2^(1 - n2)*tarC3^(1 - n3)*tarC5^(1 - n1)*rat(1, 2*(-1 + n2)*(-1 + n3)))/(tarC4^n4*pp) +
-        (tarC2^(1 - n2)*tarC3^(1 - n3)*rat(1, 4*(-1 + n2)*(-1 + n3)))/(tarC4^n4*tarC5^n1) +
-        (tarC2^(1 - n2)*tarC3^(1 - n3)*tarC4^(1 - n4)*rat(1, 4*(-1 + n2)*(-1 + n3)))/(tarC5^n1*pp) +
-        (tarC2^(2 - n2)*tarC3^(1 - n3)*tarC5^(-1 - n1)*tmm*rat(n1, 2*(-2 + n2)*(-1 + n2)*(-1 + n3)))/
-        (tarC4^n4*pp) + (tarC2^(2 - n2)*tarC3^(1 - n3)*rat(4 + 2*n1 - n2 - 2*n3,
-        4*(-2 + n2)*(-1 + n2)*(-1 + n3)))/(tarC4^n4*tarC5^n1*pp) +
-        (tarC2^(2 - n2)*tarC3^(2 - n3)*tarC4^(-1 - n4)*rat(-n4, 2*(-2 + n2)*(-1 + n2)*(-1 + n3)))/
-        (tarC5^n1*pp) + (tarC2^(2 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4)*tarC5^(1 - n1)*
-        rat(n4, 2*(-2 + n2)*(-1 + n2)*(-1 + n3)))/pp)*sdim(dp - 2);
-        
-* eq.70
-        id,only,ifmatch->sortme sdim(dp?pos_)/tarC5/tarC2/tarC3/tarC4= 
-        ((tmm*pp*rat(-3, 4*(-3 + d + dp)^2) + tmm^2*rat(3, (-3 + d + dp)^2))/(tarC2*tarC3*tarC4*tarC5) +
-        (tmm*rat(-98 + 55*d - 8*d^2 + 55*dp - 16*d*dp - 8*dp^2,
-        4*(-3 + d + dp)^2*(-10 + 3*d + 3*dp)))/(tarC1*tarC4*tarC5))*sdim(-2 + dp) +
-        (rat(1, 1)/(tarC1^2*tarC4*tarC5) +
-        (tmm*rat(-4*(-2 + d + dp), (-3 + d + dp)*(-10 + 3*d + 3*dp)))/(tarC1^3*tarC4*tarC5) +
-        (tmm*rat(2 - d - dp, (-3 + d + dp)*(-10 + 3*d + 3*dp)) +
-        pp*rat(-2 + d + dp, (-3 + d + dp)*(-10 + 3*d + 3*dp)))/(tarC1^2*tarC4*tarC5^2))*sdim(dp) +
-        G(dp, 2, 1)*(pp*rat(2 - d - dp, (-3 + d + dp)*(-10 + 3*d + 3*dp)) +
-        tmm*rat(-8 + 4*d + 4*dp, (-3 + d + dp)*(-10 + 3*d + 3*dp)))*T1(dp, 2) +
-        tmm*G(dp, 1, 1)*rat(-4*(-4 + d + dp), (-3 + d + dp)*(-10 + 3*d + 3*dp))*T1(dp, 3) +
-        tmm*rat(3, 4*(-3 + d + dp)^2)*T2(-2 + dp, 1, 1, 1);
-        endif;
-
-#endprocedure
-*--#] drrV :
-
-*--#[ drrJ :
-#procedure drrJ
-* Here all J-type integrals converted to standard form without C2 and C3
-        if((count(tarC2,-1) == 0) && (count(tarC3,-1) == 0));
-        
-* J(1,2,3) -(1)-> J(1,3,2) -(2)-> J(2,3,1) -(3)-> J(3,2,1)
-        if(count(tarC4,-1) > count(tarC5,-1)) Multiply replace_(tarC4,tarC5,tarC5,tarC4);
-        if(count(tarC4,-1) > count(tarC1,-1)) Multiply replace_(tarC4,tarC1,tarC1,tarC4);
-        if(count(tarC5,-1) > count(tarC1,-1)) Multiply replace_(tarC5,tarC1,tarC1,tarC5);
-        
-* eq.81
-        id,ifmatch->sortme sdim(dp?pos_)/tarC1^n1?{>1}/tarC5^n2?{>1}/tarC4^n3?pos_=
-        ((tarC1^(1 - n1)*tarC4^(1 - n3)*tmm*rat(-1, (-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/
-        (tarC5^n2*pp) + (tarC4^(1 - n3)*tarC5^(1 - n2)*tmm*
-        rat(-1, (-1 + n2)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/(tarC1^n1*pp) +
-        (tarC1^(2 - n1)*tmm*rat(1, (-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/
-        (tarC4^n3*tarC5^n2*pp) +
-        (tarC1^(1 - n1)*(tmm*rat(-1, (-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)) +
-        (tmm^2*rat(1, (-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/pp))/(tarC4^n3*tarC5^n2) +
-        (tarC5^(2 - n2)*tmm*rat(1, (-1 + n2)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/
-        (tarC1^n1*tarC4^n3*pp) +
-        (tarC5^(1 - n2)*(tmm*rat(-1, (-1 + n2)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)) +
-        (tmm^2*rat(1, (-1 + n2)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/pp))/(tarC1^n1*tarC4^n3) +
-        tarC1^(1 - n1)*tarC4^(-1 - n3)*tarC5^(1 - n2)*
-        ((tmm^2*rat(-2*n3, (-1 + n1)*(-1 + n2)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/pp +
-        tmm*rat(2*n3, (-1 + n1)*(-1 + n2)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3))) +
-        (tarC1^(1 - n1)*tarC5^(1 - n2)*
-        ((tmm*rat(-2 + n1 + n2 - 2*n3, (-1 + n1)*(-1 + n2)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 +
-        2*n3)))/pp + rat(2 - d - dp + 2*n3, (-1 + n1)*(-1 + n2)*
-       (2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3))))/tarC4^n3)*sdim(-2 + dp);
-
-
-* J(1,2,3) -(1)-> J(1,3,2) -(2)-> J(2,3,1) -(3)-> J(3,2,1)
-        if(count(tarC4,-1) > count(tarC5,-1)) Multiply replace_(tarC4,tarC5,tarC5,tarC4);
-        if(count(tarC4,-1) > count(tarC1,-1)) Multiply replace_(tarC4,tarC1,tarC1,tarC4);
-        if(count(tarC5,-1) > count(tarC1,-1)) Multiply replace_(tarC5,tarC1,tarC1,tarC5);
-        
-* eq.82
-        id,ifmatch->sortme sdim(dp?pos_)/tarC1^n1?{>2}/tarC5^n2?pos_/tarC4^n3?pos_=
-        ((tarC1^(2 - n1)*tarC5^(1 - n2)*rat(-1, 2*(-2 + n1)*(-1 + n1)))/(tarC4^n3*tmm) +
-        (tarC1^(2 - n1)*tarC4^(1 - n3)*rat(-1, 2*(-2 + n1)*(-1 + n1)))/(tarC5^n2*tmm) +
-        (tarC1^(3 - n1)*rat(1, 2*(-2 + n1)*(-1 + n1)))/(tarC4^n3*tarC5^n2*tmm) +
-        (tarC1^(1 - n1)*((tmm^2*rat(-2, (-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/pp +
-        pp*rat(-2, (-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)) +
-        tmm*rat(4, (-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3))))/(tarC4^n3*tarC5^n2) +
-        (tarC1^(3 - n1)*tarC5^(-1 - n2)*
-        ((tmm*rat(-n2, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/pp +
-        rat(n2, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3))))/tarC4^n3 +
-        tarC1^(2 - n1)*tarC4^(1 - n3)*tarC5^(-1 - n2)*
-        (rat(-n2, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)) +
-        (tmm*rat(n2, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/pp) +
-        (tarC1^(2 - n1)*tarC5^(-1 - n2)*
-        (tmm*rat(-2*n2, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)) +
-        (tmm^2*rat(n2, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/pp +
-        pp*rat(n2, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3))))/tarC4^n3 +
-        (tarC1^(3 - n1)*tarC4^(-1 - n3)*
-        ((tmm*rat(-n3, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/pp +
-        rat(n3, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3))))/tarC5^n2 +
-        tarC1^(2 - n1)*tarC4^(-1 - n3)*tarC5^(1 - n2)*
-        (rat(-n3, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)) +
-        (tmm*rat(n3, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/pp) +
-        (tarC1^(2 - n1)*tarC4^(-1 - n3)*
-        (tmm*rat(-2*n3, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)) +
-        (tmm^2*rat(n3, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/pp +
-        pp*rat(n3, (-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3))))/tarC5^n2 +
-        (tarC1^(2 - n1)*(rat(-18 + 7*d + 7*dp + 2*n1 - 8*n2 - 8*n3, 2*(-2 + n1)*(-1 + n1)*
-        (2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)) +
-        (tmm*rat(8 - 4*n1 + 2*n2 + 2*n3, 2*(-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 +
-        2*n2 + 2*n3)))/pp + (pp*rat(6 - d - dp - 2*n1 + 2*n2 + 2*n3,
-        2*(-2 + n1)*(-1 + n1)*(2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3)))/tmm))/
-        (tarC4^n3*tarC5^n2))*sdim(-2 + dp) +
-        (tarC1^(1 - n1)*rat(3*d + 3*dp - 2*n1 - 2*n2 - 2*n3, 2*(-1 + n1))*sdim(dp))/
-        (tarC4^n3*tarC5^n2*tmm);
-
-* eq.87
-        id,only,ifmatch->sortme sdim(dp?pos_)/tarC1/tarC5/tarC4=        
-        (((tmm^4*rat(-54, (-3 + d + dp)*(-10 + 3*d + 3*dp)*(-8 + 3*d + 3*dp)))/pp +
-        tmm*pp^2*rat(-2, (-3 + d + dp)*(-10 + 3*d + 3*dp)*(-8 + 3*d + 3*dp)) +
-        tmm^2*pp*rat(14, (-3 + d + dp)*(-10 + 3*d + 3*dp)*(-8 + 3*d + 3*dp)) +
-        tmm^3*rat(42, (-3 + d + dp)*(-10 + 3*d + 3*dp)*(-8 + 3*d + 3*dp)))/(tarC1^2*tarC4*tarC5) +
-        (tmm*pp*rat(138 - 36*d - 36*dp, 3*(-3 + d + dp)*(-10 + 3*d + 3*dp)*
-        (-8 + 3*d + 3*dp)) + pp^2*rat(-4 + d + dp, 3*(-3 + d + dp)*(-10 + 3*d + 3*dp)*
-        (-8 + 3*d + 3*dp)) + tmm^2*rat(-120 + 45*d + 45*dp,
-        3*(-3 + d + dp)*(-10 + 3*d + 3*dp)*(-8 + 3*d + 3*dp)) +
-        (tmm^3*rat(-270 + 54*d + 54*dp, 3*(-3 + d + dp)*(-10 + 3*d + 3*dp)*
-        (-8 + 3*d + 3*dp)))/pp)/(tarC1*tarC4*tarC5))*sdim(-2 + dp) +
-        (tmm^2*pp*rat(4, (-4 + d + dp)*(-3 + d + dp)*(-10 + 3*d + 3*dp)*(-8 + 3*d + 3*dp)) +
-        tmm^3*rat(4*(-72 + 21*d + 21*dp), (-4 + d + dp)^2*(-3 + d + dp)*(-10 + 3*d + 3*dp)*
-        (-8 + 3*d + 3*dp)))*T1(-2 + dp, 2)^2;
-
-* eq.90        
-        id,only,ifmatch->sortme sdim(dp?pos_)/tarC1^2/tarC5/tarC4=
-        (((tmm^3*rat(-9, (-3 + d + dp)*(-10 + 3*d + 3*dp)))/pp +
-        tmm*pp*rat(-1, (-3 + d + dp)*(-10 + 3*d + 3*dp)) +
-        tmm^2*rat(10, (-3 + d + dp)*(-10 + 3*d + 3*dp)))/(tarC1^2*tarC4*tarC5) +
-        (tmm*rat(10, 3*(-3 + d + dp)*(-10 + 3*d + 3*dp)) +
-        pp*rat(3 - d - dp, 3*(-3 + d + dp)*(-10 + 3*d + 3*dp)) +
-        (tmm^2*rat(-45 + 9*d + 9*dp, 3*(-3 + d + dp)*(-10 + 3*d + 3*dp)))/pp)/(tarC1*tarC4*tarC5))*
-        sdim(-2 + dp) + tmm^2*rat(4*(-7 + 2*d + 2*dp), (-4 + d + dp)^2*(-3 + d + dp)*
-        (-10 + 3*d + 3*dp))*T1(-2 + dp, 2)^2;
-        endif;
-
-#endprocedure        
-*--#] drrJ :
 
 *--#[ redF :
 #procedure redF
@@ -939,170 +507,6 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 #endprocedure        
 *--#] redF :
 
-*--#[ redV :
-#procedure redV
-        if(count(tarC1,-1) == 0);
-        
-* eq.51
-        id,ifmatch->sortme sdim(dp?)/tarC5^n1?{>1}/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?pos_=
-        ((tarC4^(1 - n4)*rat(-1, 3))/(tarC2^n2*tarC3^n3*tarC5^n1*tmm) +
-        (tarC3^(1 - n3)*rat(1, 3))/(tarC2^n2*tarC4^n4*tarC5^n1*tmm) +
-        (tarC5^(1 - n1)*rat(3 + d + dp - 3*n1, 3*(-1 + n1)))/(tarC2^n2*tarC3^n3*tarC4^n4*tmm) +
-        (tarC3^(-1 - n3)*tarC5^(2 - n1)*rat(-2*n3, 3*(-1 + n1)))/(tarC2^n2*tarC4^n4*tmm) +
-        (tarC3^(-1 - n3)*tarC4^(1 - n4)*tarC5^(1 - n1)*rat(2*n3, 3*(-1 + n1)))/(tarC2^n2*tmm))*
-        sdim(dp);
-        
-* eq.52
-        id,ifmatch->dopartfrac sdim(dp?)/tarC5^n1?pos_/tarC2^n2?{>1}/tarC3^n3?pos_/tarC4^n4?pos_=
-        ((tarC4^(1 - n4)*(rat(1, 1)/[pp-4*tmm] + (tmm*rat(2, 1))/(pp*[pp-4*tmm])))/(tarC2^n2*tarC3^n3*tarC5^n1) +
-        (tarC2^(2 - n2)*tarC5^(-1 - n1)*tmm*rat(-2*n1, -1 + n2))/(tarC3^n3*tarC4^n4*pp*[pp-4*tmm]) +
-        (tarC2^(1 - n2)*tarC4^(1 - n4)*tarC5^(-1 - n1)*tmm*rat(2*n1, -1 + n2))/(tarC3^n3*pp*[pp-4*tmm]) +
-        (tarC2^(2 - n2)*tarC3^(-1 - n3)*tmm*rat(-2*n3, -1 + n2))/(tarC4^n4*tarC5^n1*pp*[pp-4*tmm]) +
-        (tarC2^(1 - n2)*tarC3^(-1 - n3)*tarC4^(1 - n4)*tmm*rat(2*n3, -1 + n2))/(tarC5^n1*pp*[pp-4*tmm]) +
-        (tarC2^(2 - n2)*rat(2 + 3*d + 3*dp - 2*n1 - 2*n2 - 2*n3 - 2*n4, -1 + n2))/
-        (tarC3^n3*tarC4^n4*tarC5^n1*pp*[pp-4*tmm]) + (tarC2^(2 - n2)*tarC4^(-1 - n4)*tmm*rat(-2*n4, -1 + n2))/
-        (tarC3^n3*tarC5^n1*pp*[pp-4*tmm]) + (tarC2^(1 - n2)*(rat(-3 - d - dp + 3*n2, -1 + n2)/[pp-4*tmm] +
-        (tmm*rat(2 - 2*n2 + 2*n4, -1 + n2))/(pp*[pp-4*tmm])))/(tarC3^n3*tarC4^n4*tarC5^n1) +
-        (tarC2^(1 - n2)*tarC4^(1 - n4)*rat(-2 - 3*d - 3*dp + 2*n1 + 2*n2 + 2*n3 + 2*n4, -1 + n2))/
-        (tarC3^n3*tarC5^n1*pp*[pp-4*tmm]))*sdim(dp);
-
-* eq.53
-        id,ifmatch->sortme sdim(dp?)/tarC5^n1?pos_/tarC2^n2?pos_/tarC3^n3?{>1}/tarC4^n4?pos_=
-        ((tarC4^(1 - n4)*rat(-1, 3))/(tarC2^n2*tarC3^n3*tarC5^n1*tmm) +
-        (tarC5^(1 - n1)*rat(1, 3))/(tarC2^n2*tarC3^n3*tarC4^n4*tmm) +
-        (tarC3^(2 - n3)*tarC5^(-1 - n1)*rat(-2*n1, 3*(-1 + n3)))/(tarC2^n2*tarC4^n4*tmm) +
-        (tarC3^(1 - n3)*tarC4^(1 - n4)*tarC5^(-1 - n1)*rat(2*n1, 3*(-1 + n3)))/(tarC2^n2*tmm) +
-        (tarC3^(1 - n3)*rat(3 + d + dp - 3*n3, 3*(-1 + n3)))/(tarC2^n2*tarC4^n4*tarC5^n1*tmm))*
-        sdim(dp);
-
-* eq.54
-        id,ifmatch->sortme sdim(dp?)/tarC5^n1?pos_/tarC2^n2?pos_/tarC3^n3?{>1}/tarC4^n4?pos_=
-        ((tarC3^(1 - n3)*tarC5^(-1 - n1)*rat(-n1, 2*(-1 + n3)))/(tarC2^n2*tarC4^n4) +
-        (tarC3^(2 - n3)*tarC5^(-1 - n1)*rat(-n1, 2*(-1 + n3)))/(tarC2^n2*tarC4^n4*tmm) +
-        (tarC3^(1 - n3)*tarC4^(1 - n4)*tarC5^(-1 - n1)*rat(n1, 2*(-1 + n3)))/(tarC2^n2*tmm) +
-        (tarC3^(1 - n3)*rat(2 + d + dp - n1 - 2*n3, 2*(-1 + n3)))/(tarC2^n2*tarC4^n4*tarC5^n1*tmm))*
-        sdim(dp);
-
-* eq.55
-        id,ifmatch->dopartfrac sdim(dp?)/tarC5^n1?pos_/tarC2^n2?pos_/tarC3^n3?{>1}/tarC4^n4?{>1}=
-        ((tarC4^(1 - n4)*tarC5^(-1 - n1)*rat(-n1, 2*(-1 + n4)))/(tarC2^n2*tarC3^n3) +
-        (tarC4^(2 - n4)*tarC5^(-1 - n1)*rat(-n1, 2*(-1 + n4)))/(tarC2^n2*tarC3^n3*tmm) +
-        (tarC3^(1 - n3)*tarC4^(1 - n4)*tarC5^(-1 - n1)*rat(n1, 2*(-1 + n4)))/(tarC2^n2*tmm) +
-        (tarC2^(-1 - n2)*tarC4^(2 - n4)*rat(-n2, 2*(-1 + n4)))/(tarC3^n3*tarC5^n1*tmm) +
-        (tarC2^(-1 - n2)*tarC4^(1 - n4)*(rat(-n2, -1 + n4) + (pp*rat(n2, 2*(-1 + n4)))/tmm))/
-        (tarC3^n3*tarC5^n1) + (tarC4^(1 - n4)*rat(2 + d + dp - n1 - n2 - 2*n4, 2*(-1 + n4)))/
-        (tarC2^n2*tarC3^n3*tarC5^n1*tmm))*sdim(dp);
-
-* eq.56
-        if(count(tarC3,-1) == 1)
-        id,only,ifmatch->dopartfrac sdim(dp?)/tarC5^n1?pos_/tarC2^n2?pos_/tarC3^n3?{,1}/tarC4^n4?{>1}=
-        ((tarC4^(1 - n4)*tarC5^(-1 - n1)*rat(-n1, -1 + n4))/(tarC2^n2*tarC3^n3) +
-        (tarC2^(-1 - n2)*tarC4^(2 - n4)*rat(-n2, 2*(-1 + n4)))/(tarC3^n3*tarC5^n1*tmm) +
-        (tarC2^(-1 - n2)*tarC4^(1 - n4)*(rat(-n2, -1 + n4) + (pp*rat(n2, 2*(-1 + n4)))/tmm))/
-        (tarC3^n3*tarC5^n1) + (tarC3^(-1 - n3)*tarC4^(1 - n4)*rat(-n3, -1 + n4))/(tarC2^n2*tarC5^n1) +
-        (tarC4^(1 - n4)*rat(2 + 2*(d + dp) - 2*n1 - n2 - 2*n3 - 2*n4, 2*(-1 + n4)))/
-        (tarC2^n2*tarC3^n3*tarC5^n1*tmm))*sdim(dp);
-        endif;
-#endprocedure        
-*--#] redV :
-
-*--#[ redJ :
-#procedure redJ
-        if((count(tarC2,-1) == 0) && (count(tarC3,-1) == 0));
-
-* J(1,2,3) -(1)-> J(1,3,2) -(2)-> J(2,3,1) -(3)-> J(3,2,1)
-        if(count(tarC4,-1) > count(tarC5,-1)) Multiply replace_(tarC4,tarC5,tarC5,tarC4);
-        if(count(tarC4,-1) > count(tarC1,-1)) Multiply replace_(tarC4,tarC1,tarC1,tarC4);
-        if(count(tarC5,-1) > count(tarC1,-1)) Multiply replace_(tarC5,tarC1,tarC1,tarC5);
-
-* eq.71
-        id,ifmatch->sortme sdim(dp?)/tarC1^n1?{>1}/tarC5^n2?{>1}/tarC4^n3?pos_=
-        ((tarC4^(1 - n3)*rat(1, 4))/(tarC1^n1*tarC5^n2*[pp-9*tmm]) + (tarC4^(1 - n3)*rat(3, 4))/
-        (tarC1^n1*tarC5^n2*[pp-tmm]) + (tarC1^(2 - n1)*tarC4^(-1 - n3)*rat(-n3, 4*(-1 + n1)))/
-        (tarC5^n2*[pp-tmm]) + (tarC4^(-1 - n3)*tarC5^(2 - n2)*rat(-n3, 4*(-1 + n2)))/(tarC1^n1*[pp-tmm]) +
-        (tarC1^(2 - n1)*tarC4^(-1 - n3)*rat(n3, 4*(-1 + n1)))/(tarC5^n2*[pp-9*tmm]) +
-        (tarC4^(-1 - n3)*tarC5^(2 - n2)*rat(n3, 4*(-1 + n2)))/(tarC1^n1*[pp-9*tmm]) +
-        (tarC1^(1 - n1)*rat(1 - n1 - n2 + 3*n3, 4*(-1 + n1)))/(tarC4^n3*tarC5^n2*[pp-tmm]) +
-        (tarC5^(1 - n2)*rat(1 - n1 - n2 + 3*n3, 4*(-1 + n2)))/(tarC1^n1*tarC4^n3*[pp-tmm]) +
-        (tarC1^(1 - n1)*rat(-5 - 4*(d + dp) + 5*n1 + n2 + 5*n3, 4*(-1 + n1)))/
-        (tarC4^n3*tarC5^n2*[pp-9*tmm]) + (tarC5^(1 - n2)*rat(-5 - 4*(d + dp) + n1 + 5*n2 + 5*n3,
-        4*(-1 + n2)))/(tarC1^n1*tarC4^n3*[pp-9*tmm]) +
-        (tarC1^(1 - n1)*tarC5^(1 - n2)*rat(-4 - 8*(d + dp) - 3*(d + dp)^2 + 6*n1 + 5*(d + dp)*n1 -
-        2*n1^2 + 6*n2 + 5*(d + dp)*n2 - 4*n1*n2 - 2*n2^2 + 6*n3 + 5*(d + dp)*n3 -
-        4*n1*n3 - 4*n2*n3 - 2*n3^2, 8*(-1 + n1)*(-1 + n2)))/(tarC4^n3*tmm*[pp-tmm]) +
-        (tarC1^(1 - n1)*tarC4^(-1 - n3)*tarC5^(1 - n2)*rat(9*n3 + 4*(d + dp)*n3 - 5*n1*n3 - 5*n2*n3 -
-        n3^2, 4*(-1 + n1)*(-1 + n2)))/[pp-tmm] +
-        (tarC1^(1 - n1)*tarC4^(-1 - n3)*tarC5^(1 - n2)*rat(-9*n3 - 4*(d + dp)*n3 + 5*n1*n3 + 5*n2*n3 +
-        n3^2, 4*(-1 + n1)*(-1 + n2)))/[pp-9*tmm] +
-        (tarC1^(1 - n1)*tarC5^(1 - n2)*rat(4 + 8*(d + dp) + 3*(d + dp)^2 - 6*n1 - 5*(d + dp)*n1 +
-        2*n1^2 - 6*n2 - 5*(d + dp)*n2 + 4*n1*n2 + 2*n2^2 - 6*n3 - 5*(d + dp)*n3 +
-        4*n1*n3 + 4*n2*n3 + 2*n3^2, 8*(-1 + n1)*(-1 + n2)))/(tarC4^n3*tmm*[pp-9*tmm]))*
-        sdim(dp);
-
-* J(1,2,3) -(1)-> J(1,3,2) -(2)-> J(2,3,1) -(3)-> J(3,2,1)
-        if(count(tarC4,-1) > count(tarC5,-1)) Multiply replace_(tarC4,tarC5,tarC5,tarC4);
-        if(count(tarC4,-1) > count(tarC1,-1)) Multiply replace_(tarC4,tarC1,tarC1,tarC4);
-        if(count(tarC5,-1) > count(tarC1,-1)) Multiply replace_(tarC5,tarC1,tarC1,tarC5);
-        
-* eq.79        
-        id,ifmatch->sortme sdim(dp?)/tarC1^n1?{>2}/tarC5^n2?pos_/tarC4^n3?pos_=        
-        ((tarC1^(1 - n1)*rat(4 + 2*(d + dp) - 4*n1, 4*(-1 + n1)))/(tarC4^n3*tarC5^n2*tmm) +
-        (tarC1^(1 - n1)*tarC4^(1 - n3)*tarC5^(-1 - n2)*rat(-n2, 4*(-1 + n1)))/[pp-tmm] +
-        (tarC1^(1 - n1)*tarC4^(1 - n3)*tarC5^(-1 - n2)*rat(n2, 4*(-1 + n1)))/[pp-9*tmm] +
-        (tarC1^(1 - n1)*tarC4^(-1 - n3)*tarC5^(1 - n2)*rat(-n3, 4*(-1 + n1)))/[pp-tmm] +
-        (tarC1^(1 - n1)*tarC4^(-1 - n3)*tarC5^(1 - n2)*rat(n3, 4*(-1 + n1)))/[pp-9*tmm] +
-        (tarC1^(3 - n1)*tarC4^(-1 - n3)*tarC5^(-1 - n2)*rat(-(n2*n3), 4*(-2 + n1)*(-1 + n1)))/[pp-tmm] +
-        (tarC1^(3 - n1)*tarC4^(-1 - n3)*tarC5^(-1 - n2)*rat(n2*n3, 4*(-2 + n1)*(-1 + n1)))/[pp-9*tmm] +
-        (tarC1^(1 - n1)*rat(-3 - 4*(d + dp) + 3*n1 + 3*n2 + 3*n3, 4*(-1 + n1)))/
-        (tarC4^n3*tarC5^n2*[pp-tmm]) + (tarC1^(1 - n1)*rat(-1 - 4*(d + dp) + n1 + 5*n2 + 5*n3,
-        4*(-1 + n1)))/(tarC4^n3*tarC5^n2*[pp-9*tmm]) +
-        (tarC1^(2 - n1)*tarC5^(-1 - n2)*rat(-3*n2 - 4*(d + dp)*n2 + 3*n1*n2 + 3*n2^2 + 3*n2*n3,
-        4*(-2 + n1)*(-1 + n1)))/(tarC4^n3*[pp-tmm]) +
-        (tarC1^(2 - n1)*tarC5^(-1 - n2)*rat(-9*n2 - 4*(d + dp)*n2 + 5*n1*n2 + n2^2 + 5*n2*n3,
-        4*(-2 + n1)*(-1 + n1)))/(tarC4^n3*[pp-9*tmm]) +
-        (tarC1^(2 - n1)*tarC4^(-1 - n3)*rat(-9*n3 - 4*(d + dp)*n3 + 5*n1*n3 + 5*n2*n3 + n3^2,
-        4*(-2 + n1)*(-1 + n1)))/(tarC5^n2*[pp-9*tmm]) +
-        (tarC1^(2 - n1)*rat(4 + 8*(d + dp) + 3*(d + dp)^2 - 6*n1 - 5*(d + dp)*n1 + 2*n1^2 -
-        6*n2 - 5*(d + dp)*n2 + 4*n1*n2 + 2*n2^2 - 6*n3 - 5*(d + dp)*n3 + 4*n1*n3 +
-        4*n2*n3 + 2*n3^2, 8*(-2 + n1)*(-1 + n1)))/(tarC4^n3*tarC5^n2*tmm*[pp-9*tmm]) +
-        (tarC1^(2 - n1)*tarC4^(-1 - n3)*rat(-3*n3 - 4*(d + dp)*n3 + 3*n1*n3 + 3*n2*n3 + 3*n3^2,
-        4*(-2 + n1)*(-1 + n1)))/(tarC5^n2*[pp-tmm]) +
-        (tarC1^(2 - n1)*rat(12 + 24*(d + dp) + 9*(d + dp)^2 - 18*n1 - 15*(d + dp)*n1 + 6*n1^2 -
-        18*n2 - 15*(d + dp)*n2 + 12*n1*n2 + 6*n2^2 - 18*n3 - 15*(d + dp)*n3 + 12*n1*n3 +
-        12*n2*n3 + 6*n3^2, 8*(-2 + n1)*(-1 + n1)))/(tarC4^n3*tarC5^n2*tmm*[pp-tmm]))*sdim(dp);
-
-        endif;        
-#endprocedure        
-*--#] redJ :
-
-*--#[ drrT2 :
-#procedure drrT2
-
-*       FORM internal ordering lead to (3,2,1) -> (1,2,3)        
-        Symmetrize T2 4,3,2;
-        
-* eq.91-1
-        id T2(dp?pos_,n1?{>1},n2?,n3?pos_)=        
-        rat(-1, (-2 + d + dp)*(-1 + n1))*T2(-2 + dp, -2 + n1, n2, n3) + rat(1, (-2 + d + dp)*(-1 + n1))*T2(-2 + dp, -1 + n1, -1 + n2, n3) + 
-        rat(1, (-2 + d + dp)*(-1 + n1))*T2(-2 + dp, -1 + n1, n2, -1 + n3) + tmm*rat(1, (-2 + d + dp)*(-1 + n1))*T2(-2 + dp, -1 + n1, n2, n3);
-        
-        Symmetrize T2 4,3,2;
-* eq.91-2
-        id T2(dp?pos_,n1?pos_,n2?{>1},n3?{>1})=
-        rat(-2 + d + dp - 2*n1, (-2 + d + dp)*(-1 + n2)*(-1 + n3))*T2(-2 + dp, n1, -1 + n2, -1 + n3) + 
-        tmm*rat(-2*n1, (-2 + d + dp)*(-1 + n2)*(-1 + n3))*T2(-2 + dp, 1 + n1, -1 + n2, -1 + n3);
-        
-        Symmetrize T2 4,3,2;
-* eq.91-3        
-        if(match(T2(dp?pos_,1,1,n3?pos_)) || match(T2(dp?pos_,1,n2?pos_,1)));
-        id T2(dp?pos_,n1?,n2?,n3?)=
-        tmm*rat(1, (-2 + d + dp)*(-1 + d + dp - n2 - n3))*T2(-2 + dp, 0, n2, n3) + tmm*rat(1, (-2 + d + dp)*(-1 + d + dp - n2 - n3))*
-        T2(-2 + dp, 1, -1 + n2, n3) + tmm*rat(1, (-2 + d + dp)*(-1 + d + dp - n2 - n3))*T2(-2 + dp, 1, n2, -1 + n3) + 
-        tmm^2*rat(3, (-2 + d + dp)*(-1 + d + dp - n2 - n3))*T2(-2 + dp, 1, n2, n3);
-        endif;
-#endprocedure
-*--#] drrT2 :
-
 *--#[ redT2 :
 #procedure redT2
         Symmetrize T2 4,3,2;
@@ -1116,7 +520,6 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         id T2(0,1,1,1) = T2x111;
 #endprocedure
 *--#] redT2 :
-
 
 
 *--#[ drrG :
@@ -1192,10 +595,15 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
                 la sortme;
                 $irep = 0;
                 la endrec;
-                
-                ModuleOption,minimum,$irep;
+
+                b pp,[pp-4*tmm];
+                ModuleOption,minimum,$irep;                
                 .sort:redG-`$repcount++';
                 #redefine irep "`$irep'"
+                Keep Brackets;
+                ratio [pp-4*tmm],pp,mden;        
+                Multiply replace_(mden,4*tmm);
+                .sort                
         #enddo
 #endprocedure
 *--#] redG :
@@ -1218,65 +626,13 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 #endprocedure
 *--#] redT1 :
 
-*--#[ uniqueTK :
-#procedure uniqueTK
-        if((count(tarC1,-1) == 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0))
-        Multiply replace_(tarC3,tarC1, tarC4,tarC2);
-#endprocedure
-*--#] uniqueTK :
-
-*--#[ uniqueTJ :
-#procedure uniqueTJ
-        if((count(tarC1,-1) == 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) == 0) && (count(tarC5,-1) > 0))
-        Multiply replace_(tarC2,tarC1, tarC3,tarC4);
-#endprocedure
-*--#] uniqueTJ :
-
-*--#[ uniqueTV :
-#procedure uniqueTV
-        if((count(tarC1,-1) > 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0))
-        Multiply replace_(tarC1,tarC2, tarC3,tarC4, tarC4,tarC3);
-
-        if((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) == 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0))
-        Multiply replace_(tarC1,tarC3, tarC2,tarC4, tarC4,tarC2);
-
-        if((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) == 0) && (count(tarC5,-1) > 0))
-        Multiply replace_(tarC1,tarC4, tarC2,tarC3, tarC3,tarC2);
-#endprocedure        
-*--#] uniqueTV :
-
-*--#[ i2f :
-#procedure i2f(topo)
-        if(count(int`topo',1));
-*       Convert all simple integrals to functions
-*       G(dp,n1,n2), T1(dp,n1) and T2(dp,n1,n2,n3)        
-        if((count(tarC1,-1) == 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1,tarC4,-1,tarC5,-1) > 0));
-        id sdim(?a)/tarC3^n3?/tarC4^n4?/tarC5^n5? = T2(?a,n3,n4,n5);
-        endif;
-        
-        if((count(tarC3,-1) == 0) && (count(tarC4,-1) == 0) && (count(tarC1,-1,tarC2,-1,tarC5,-1) > 0));
-        id sdim(?a)/tarC1^n1?/tarC2^n2?/tarC5^n5? = T2(?a,n1,n2,n5);        
-        endif;
-        
-        if((count(tarC5,-1) == 0) && (count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,-1,tarC4,-1) > 0)) id sdim(dp?)/tarC1^n1?/tarC2^n2?/tarC3^n3?/tarC4^n4? = G(dp,n1,n3)*G(dp,n2,n4);        
-        
-        if((count(tarC1,-1,tarC3,-1) == 0) && count(tarC2,1,tarC4,1,tarC5,1) != 0) id sdim(dp?)/tarC2^n2?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = T1(dp,n5)*G(dp,n2,n4);        
-        if((count(tarC2,-1,tarC4,-1) == 0) && count(tarC1,1,tarC3,1,tarC5,1) != 0) id sdim(dp?)/tarC1^n1?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = T1(dp,n5)*G(dp,n1,n3);
-        
-        id T2(dp?,n1?,n2?,0) = T1(dp,n1)*T1(dp,n2);
-        id T2(dp?,0,n2?,n3?) = T1(dp,n2)*T1(dp,n3);
-        id T2(dp?,n1?,0,n3?) = T1(dp,n1)*T1(dp,n3);                
-        
-        id G(dp?,n1?,0) = T1(dp,n1);                
-        id G(dp?,0,n2?) = T1(dp,n2);
-        endif;
-#endprocedure        
-*--#] i2f :
-
 *--#[ partfrac :
 #procedure partfrac
 * Do partial fractioning for propagators connecting 
 * two-loop diagram with one-loop
+        b pp,[pp-tmm],[pp-3*tmm],[pp-4*tmm],[pp-9*tmm];
+        .sort
+        Keep Brackets;        
 *       [pp]        
         #do ms={tmm,3*tmm,4*tmm,9*tmm}
                 ratio [pp-`ms'],pp,mden;        
@@ -1294,7 +650,8 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         #enddo
 *       [pp-4ms]                
         ratio [pp-9*tmm],[pp-4*tmm],mden;        
-        Multiply replace_(mden,5*tmm);      
+        Multiply replace_(mden,5*tmm);
+        .sort        
 #endprocedure        
 *--#] partfrac :
 
@@ -1410,7 +767,7 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
 
 
 *--#[ tensT1 :
-#procedure tensT1(D1,K)
+#procedure tensT1(D1,K,MUL)
 * Tensor reduction of T1 with tensor structure in numerator
 * Loop momentum is K
 *         
@@ -1445,493 +802,11 @@ numJ1011X11110, numJ2010X01100, numJ2010X11100, numJ2011X11110;
         id `K'.`K'^n?pos_ = (`D1' + tmm)^n;
         if(count(`D1',1) >= 0) Discard;        
         id 1/`D1'^n?pos_ = T1(0,n);
+        else;
+        Multiply `MUL';        
         endif;
 #endprocedure
 *--#] tensT1 :
-
-*--#[ tarcer :
-#procedure tarcer(topo)
-
-*       <0> rewrite all tarC1..5 in numerator in terms of sp
-
-*       <1> reduce scalar products to irreducible set        
-        #call redsp(`topo')
-        #printtimes
-
-*       <2> convert integrals with irreducible numerator to
-*           scalar integrals with shifted dimension       
-        
-        if(count(int`topo',1));
-        if(count(tk1.tk1,1,tk2.tk2,1,tk1.tk2,1) > 0);
-        exit "Not all SP reduced";
-        endif;
-        endif;
-        .sort:check numerator;        
-        
-        if(count(int`topo',1));
-
-        if(count(tp.tk1,1,tp.tk2,1) > 0);        
-*********         
-*       When all 5 propagators present - tensor reduction not needed!!!        
-*********        
-
-*       V2345        
-        if((count(tarC1,1) == 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab2345(x,y,n2,n3,n4,n5);
-
-*       V1345        
-        elseif((count(tarC1,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab1345(x,y,n1,n3,n4,n5);
-
-*       V1245        
-        elseif((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,1) == 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab1245(x,y,n1,n2,n4,n5);
-
-*       V1235        
-        elseif((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tVab1235(x,y,n1,n2,n3,n5);
-
-*       J145        
-        elseif((count(tarC1,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC3,1) == 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tJab145(x,y,n1,n4,n5);
-
-*       J235        
-        elseif((count(tarC1,1) == 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tJab235(x,y,n2,n3,n5);
-
-*       K125        
-        elseif((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,1) == 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tKab125(x,y,n1,n2,n5);
-
-*       K345        
-        elseif((count(tarC1,1) == 0) && (count(tarC2,1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = pocoisp^(x+y)*tKab345(x,y,n3,n4,n5);
-
-
-********         
-******* Topolgies with one-loop factors GxG, GxT, TxT
-********        
-
-* 
-*       !!! No tarC1...tarC5 in numerator at this point !!!
-*         
-
-***************************************************         
-*       GxG        
-        elseif((count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,-1,tarC4,-1) > 0) && (count(tarC5,1) == 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        Multiply intGxG/intFG;        
-
-***************************************************         
-*       TxG
-        elseif((count(tarC1,1) == 0) && (count(tarC2,-1,tarC4,-1) > 0) && (count(tarC3,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        Multiply intTxG/intFG;        
-
-***************************************************         
-*       GxT
-        elseif((count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,1) == 0) && (count(tarC4,1) == 0) && (count(tarC5,-1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0));
-        Multiply intGxT/intFG;        
-        endif;        
-
-        else;
-*       For integrals wo isp in numerator we apply zero shift        
-        Multiply sdim(0);
-        endif;
-
-
-        if((count(intFG,1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0)) Print "Numerator term: %t";
-
-        if((count(intFG,1) > 0) && (count(tp.tk1,1,tp.tk2,1) > 0)) exit  "Numerator not reduced!!!";
-        
-*       Identify simple integrals(tadpoles and facorized) in shifted dimension        
-        #call i2f(`topo')        
-
-        endif;
-
-        .sort:Tab-tab;
-
-
-*       Tensor reduction for factorized integrals         
-        if(count(intGxG,1));
-        #call tensG(tarC1,tarC3,tk1,tp)
-        endif;
-        .sort:intGxG-1;
-        if(count(intGxG,1));
-        #call tensG(tarC2,tarC4,tk2,tp)
-        id tp.tp^n? = pp^n;        
-        Multiply intFG/intGxG;        
-        endif;        
-        .sort:intGxG-2;
-
-        if(count(intTxG,1));
-*       First integrate tadpole with tk1,tk2 in denominator:        
-        Multiply replace_(tk1,[tk1-tk2] + tk2);
-        #call tensT1(tarC5,[tk1-tk2])
-        endif;
-        .sort:intTxG-1;
-        if(count(intTxG,1));
-*       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
-        Multiply replace_([tk1-tk2],tk1 - tk2);        
-        #call tensG(tarC2,tarC4,tk2,tp)
-        id tp.tp^n? = pp^n;        
-        Multiply intFG/intTxG;        
-        endif;        
-        .sort:intTxG-2;
-
-        if(count(intGxT,1));
-        Multiply replace_(tk2, tk1 - [tk1-tk2]);
-        #call tensT1(tarC5,[tk1-tk2])
-        endif;
-        .sort:intGxT-1;
-        if(count(intGxT,1));
-*       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
-        Multiply replace_([tk1-tk2],tk1 - tk2);        
-        #call tensG(tarC1,tarC3,tk1,tp)
-        id tp.tp^n? = pp^n;                
-         Multiply intFG/intGxT;        
-        endif;        
-        .sort:intGxT-2;
-
-        
-**********************************************************************************************
-* 
-*       Here we substitute RHS with tables but only for 
-*       fixed maximal power of isp in numerator
-* 
-
-        #$pisp = 0;
-        if ( count(pocoisp,1) > $pisp ) $pisp = count_(pocoisp,1);
-        .sort
-        #write ">>>                            "        
-        #write ">>>   Maximal isp power: `$pisp'"
-        #write ">>>                            "
-
-        #if `$pisp' > `SPMAXRANK'
-                #write "ERROR:Irreducible sp table weight `SPMAXRANK' is to low";
-                #terminate
-        #endif        
-
-
-        #do xyp = `$pisp',1,-1
-                id pocoisp^`xyp'*tVab2345(x?,y?,n2?,n3?,n4?,n5?) = Vab2345(x,y,n2,n3,n4,n5);
-                .sort:tabV2345-`xyp';                
-                id pocoisp^`xyp'*tVab1345(x?,y?,n1?,n3?,n4?,n5?) = Vab1345(x,y,n1,n3,n4,n5);
-                .sort:tabV1345-`xyp';                
-                id pocoisp^`xyp'*tVab1245(x?,y?,n1?,n2?,n4?,n5?) = Vab1245(x,y,n1,n2,n4,n5);
-                .sort:tabV1245-`xyp';                
-                id pocoisp^`xyp'*tVab1235(x?,y?,n1?,n2?,n3?,n5?) = Vab1235(x,y,n1,n2,n3,n5);
-                .sort:tabV1235-`xyp';                
-
-                id pocoisp^`xyp'*tJab145(x?,y?,n1?,n4?,n5?) = Jab145(x,y,n1,n4,n5);
-                .sort:tabJ145-`xyp';                
-                id pocoisp^`xyp'*tJab235(x?,y?,n2?,n3?,n5?) = Jab235(x,y,n2,n3,n5);
-                .sort:tabJ235-`xyp';                
-
-                id pocoisp^`xyp'*tKab125(x?,y?,n1?,n2?,n5?) = Kab125(x,y,n1,n2,n5);
-                .sort:tabK125-`xyp';                
-                id pocoisp^`xyp'*tKab345(x?,y?,n3?,n4?,n5?) = Kab345(x,y,n3,n4,n5);
-                .sort:tabK345-`xyp';                
-        #enddo                
-
-**********************************************************************************************
-        
-*       <3> reduce scalar integrals in arbitrary dimension
-*         #do i=1,1       
-*                 if(count(int`topo',1));
-*                 #call redF
-* *                 #call drrF
-*                 id,only sdim(0)/tarC1/tarC2/tarC3/tarC4/tarC5 = TFI(1,1,1,1,1);                
-*                 if((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0)) redefine i "0";
-*                 endif;
-*                 .sort:redF-drrF;                
-*         #enddo
-
-*       <4> reduce dimension back
-*         #call drrF
-*         #call zeroTFI        
-
-        if(count(int`topo',1));
-        #call i2f(`topo')        
-        #call uniqueTV
-        endif;
-        .sort:uniqueTV;        
-
-        #message
-        #message reduce and apply DRR V                
-        #message
-        #$repcount = 1;        
-        #do irep=1,1
-                #$irep = 1;          
-                #call i2f(`topo')                      
-                if(count(int`topo',1));
-                #call drrV                
-                #call redV
-                endif;
-                
-                goto endrec;         
-                la dopartfrac;
-                #call partfrac                       
-                la sortme;
-                $irep = 0;
-                la endrec;
-                
-                ModuleOption,minimum,$irep;
-                .sort:redV-drrV-`$repcount++';
-                #redefine irep "`$irep'"
-        #enddo
-        #printtimes
-
-        if(count(int`topo',1));
-        #call i2f(`topo')        
-        #call uniqueTJ
-        endif;
-        .sort:uniqueTJ;
-
-
-        #message
-        #message reduce and apply DRR J
-        #message
-        #$repcount = 1;        
-        #do irep=1,1
-                #$irep = 1;                
-                if(count(int`topo',1));
-                #call drrJ                
-                #call redJ
-                #call i2f(`topo')                
-                endif;
-                
-                goto endrec;                
-                la sortme;
-                $irep = 0;
-                la endrec;
-                
-                ModuleOption,minimum,$irep;
-                .sort:redJ-drrJ-`$repcount++';
-                #redefine irep "`$irep'"
-        #enddo
-        #printtimes
-        
-        if(count(int`topo',1)) if(match(sdim(dp?pos_))) Print "term: %t";    
-        if(count(int`topo',1)) if(match(sdim(dp?pos_))) exit "Complicated integrals in higher dimensions";    
-        .sort:Check higher dim ints;
-
-
-        #message
-        #message reduce F                
-        #message
-        #$repcount = 1;        
-        #do irep=1,1
-                #$irep = 1;                
-                if(count(int`topo',1));
-                #call redF
-                id,only 1/tarC1/tarC2/tarC3/tarC4/tarC5 = TFI(1,1,1,1,1);                
-                endif;
-                
-                goto endrec;
-                la dopartfrac;
-                #call partfrac                                       
-                $irep = 0;
-                la endrec;
-                
-                ModuleOption,minimum,$irep;
-                .sort:redF-noshift-`$repcount++';
-                #redefine irep "`$irep'"
-        #enddo
-        #printtimes
-
-        if(count(int`topo',1));
-        #call uniqueTV
-        endif;
-        .sort:uniqueTV;     
-
-        #message
-        #message reduce V                
-        #message
-        #$repcount = 1;        
-        #do irep=1,1
-                #$irep = 1;                
-                if(count(int`topo',1));
-                #call redV
-                id,only 1/tarC2/tarC3/tarC4/tarC5 = TFI(0,1,1,1,1);                 
-                endif;
-                
-                goto endrec;
-                la dopartfrac;
-                #call partfrac                                       
-                la sortme;
-                $irep = 0;
-                la endrec;
-                
-                ModuleOption,minimum,$irep;
-                .sort:redV-noshift-`$repcount++';
-                #redefine irep "`$irep'"
-        #enddo
-        #printtimes
-  
-
-        if(count(int`topo',1));        
-        #call uniqueTJ
-        endif;
-        .sort:uniqueTJ;     
-
-        #message
-        #message reduce J                
-        #message
-        #$repcount = 1;        
-        #do irep=1,1
-                #$irep = 1;                
-                if(count(int`topo',1));
-                #call redJ
-                id,only 1/tarC1^2/tarC4/tarC5 = TFI(2,0,0,1,1);
-                id,only 1/tarC1/tarC4/tarC5 = TFI(1,0,0,1,1);                
-                endif;
-                
-                goto endrec;                
-                la sortme;
-                $irep = 0;
-                la endrec;
-                
-                ModuleOption,minimum,$irep;
-                .sort:redJ-noshift-`$repcount++';
-                #redefine irep "`$irep'"
-        #enddo
-        #printtimes        
-
-        if(count(int`topo',1));        
-        id sdim(0) = 1;
-
-
-* Now identify tadpoles and simpler integrals
-
-* Two-loop tadpoles
-
-        if((count(tarC1,-1) == 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1,tarC4,-1,tarC5,-1) != 0)) id 1/tarC3^n3?/tarC4^n4?/tarC5^n5? = T2(0, n3,n4,n5);
-        
-        if((count(tarC3,-1) == 0) && (count(tarC4,-1) == 0) && (count(tarC1,-1,tarC2,-1,tarC5,-1) != 0)) id 1/tarC1^n1?/tarC2^n2?/tarC5^n5? = T2(0, n1,n2,n5);        
-
-
-        if((count(tarC5,-1) == 0) && (count(tarC1,-1,tarC3,-1) > 0) && (count(tarC2,-1,tarC4,-1) > 0)) id 1/tarC1^n1?/tarC2^n2?/tarC3^n3?/tarC4^n4? = G(0, n1,n3)*G(0, n2,n4);        
-        
-        if((count(tarC1,-1,tarC3,-1) == 0) && count(tarC2,1,tarC4,1,tarC5,1) != 0) id 1/tarC2^n2?/tarC4^n4?/tarC5^n5? = T1(0,n5)*G(0,n2,n4);        
-        if((count(tarC2,-1,tarC4,-1) == 0) && count(tarC1,1,tarC3,1,tarC5,1) != 0) id 1/tarC1^n1?/tarC3^n3?/tarC5^n5? = T1(0,n5)*G(0,n1,n3);        
-
-
-        id T2(0, n1?,n2?,0) = T1(0,n1)*T1(0,n2);
-        id T2(0, 0,n2?,n3?) = T1(0,n2)*T1(0,n3);
-        id T2(0, n1?,0,n3?) = T1(0,n1)*T1(0,n3);                
-        
-        id G(0, n1?,0) = T1(0,n1);
-        id G(0, 0,n2?) = T1(0,n2);
-        endif;
-
-        #call partfrac
-        .sort:red-FVJ-done;
-
-
-********************************************************************************************************
-*  Reduce symple integrals        
-
-*         
-*       Two-loop tadpoles        
-*         
-
-*       Apply DRR to T2   
-        #message
-        #message drr T2                
-        #message     
-        #do i=1,1
-                if(count(int`topo',1));
-                #call drrT2
-                if(match(T2(dp?pos_,n1?pos_,n2?pos_,n3?pos_))) redefine i "0";
-                endif;
-                .sort:drr-T2;
-        #enddo
-        #printtimes
-
-*       Reduce T2        
-        #message
-        #message reduce T2                
-        #message
-        #do i=1,1
-                if(count(int`topo',1));
-                #call redT2
-                if(match(T2(0,n1?pos_,n2?pos_,n3?pos_))) redefine i "0";
-                endif;
-                .sort:red-T2;
-        #enddo
-        #printtimes
-
-        if(count(int`topo',1));
-        id T2(dp?,n1?pos_,n2?pos_,0) = T1(dp,n1)*T1(dp,n2);
-        id T2(dp?,n1?pos_,0,n3?pos_) = T1(dp,n1)*T1(dp,n3);
-        id T2(dp?,0,n2?pos_,n3?pos_) = T1(dp,n2)*T1(dp,n3);
-        
-        if(match(T2(dp?,n1?,n2?,n3?))) exit "Unreduced T2";
-        endif;
-
-*         
-*       One-loop propagator       
-*         
-
-
-        #message
-        #message reduce G                
-        #message
-
-        if(count(int`topo',1));
-        Symmetrize G 2,3;
-        #ifndef `NOGTAB'
-                id G(dp?pos0_,n1?,n2?) = Gtab(dp,n1,n2);
-        #endif
-        endif;
-
-        #call partfrac
-        .sort:Gtab;
-
-*       if not found in table we use normal reduction
-
-        id Gtab(dp?,n1?,n2?) = G(dp,n1,n2);
-
-        #call drrG(`topo')
-
-        #call redG(`topo')
-        id G(0,1,1) = Gx11;
-        
-        if(count(int`topo',1));
-        id G(dp?,n1?,0) = T1(dp,n1);
-        id G(dp?,0,n2?) = T1(dp,n2);
-        endif;
-        #printtimes
-
-*       Now reduce one-loop tadpoles        
-        #message
-        #message drr T1                
-        #message
-        #do i=1,1
-                if(count(int`topo',1));
-                #call drrT1
-                if(match(T1(dp?pos_,n1?pos_))) redefine i "0";
-                endif;
-                .sort:drr-T1;
-        #enddo
-        
-
-        #message
-        #message reduce T1                
-        #message
-        #do i=1,1
-                if(count(int`topo',1));
-                #call redT1
-                if(match(T1(0,n1?pos_))) redefine i "0";
-                endif;
-                .sort:red-T1;
-        #enddo
-
-        if(count(int`topo',1)) id T1(dp?,0) = 0;
-        #call partfrac
-        #call subpoch
-
-#endprocedure
-*--#] tarcer :
 
 *
 ****
@@ -8474,11 +7349,631 @@ num(-1 + pp + tk1.tk1 - 2*tk1.tk2 + 2*tk1.tk4 - 2*tk1.tp + tk2.tk2 - 2*tk2.tk4 +
 #endprocedure
 *--#] redBMW :
 
+
+* 
+* 
+*************************************************************************** 
+* 
+*   New reduction for 2-loop propagators 
+*
+
+* all to 125
+*--#[ uniqueTK :
+#procedure uniqueT2new(TOPO)
+        if(count(int`TOPO',1));        
+        if((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) <= 0) && (count(tarC4,-1) <= 0) && (count(tarC5,-1) > 0))
+        Multiply intT2/int`TOPO';
+
+        if((count(tarC1,-1) <= 0) && (count(tarC2,-1) <= 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0))
+        Multiply replace_(tarC4,tarC1, tarC3,tarC2, tarC2,tarC3, tarC1,tarC4)*intT2/int`TOPO';
+        endif;        
+#endprocedure
+*--#] uniqueTK :
+
+*--#[ uniqueTJ :
+#procedure uniqueJnew(TOPO)
+        if(count(int`TOPO',1));        
+        if((count(tarC1,-1) <= 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) <= 0) && (count(tarC5,-1) > 0))
+        Multiply intJ/int`TOPO';
+
+        if((count(tarC1,-1) > 0) && (count(tarC2,-1) <= 0) && (count(tarC3,-1) <= 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0))
+        Multiply replace_(tarC3,tarC1, tarC4,tarC2, tarC1,tarC3, tarC2,tarC4)*intJ/int`TOPO';
+        endif;        
+#endprocedure
+*--#] uniqueTJ :
+
+*--#[ uniqueTV :
+#procedure uniqueVnew(TOPO)
+        if(count(int`TOPO',1));        
+        if((count(tarC1,-1) <= 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0))
+        Multiply intV/int`TOPO';
+        if((count(tarC1,-1) > 0) && (count(tarC2,-1) <= 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0))
+        Multiply replace_(tarC1,tarC2, tarC2,tarC1, tarC3,tarC4, tarC4,tarC3)*intV/int`TOPO';
+
+        if((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) <= 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0))
+        Multiply replace_(tarC1,tarC3, tarC3,tarC1, tarC2,tarC4, tarC4,tarC2)*intV/int`TOPO';
+
+        if((count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) <= 0) && (count(tarC5,-1) > 0))
+        Multiply replace_(tarC4,tarC1, tarC1,tarC4, tarC3,tarC2, tarC2,tarC3)*intV/int`TOPO';
+        endif;
+#endprocedure        
+*--#] uniqueTV :
+
+
+#procedure red01111
+#$repcount = 1;        
+#do irep=1,1
+#$irep = 1;                
+* do not need partfrac=1        
+#$nopf = 1;                        
+if(count(intV,1));
+
+*   n1 != 0 && n5 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?{>1} = 
+(n4*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC4^(-1 - n4)*tarC5^(1 - n5))/((-1 + n5)*tarC3^n3) + (tarC1^(-1 - n1)*tarC2^(1 - n2))/(tarC3^n3*tarC4^n4*tarC5^n5) + (tarC1^(-1 - n1)*tarC3^(1 - n3)*(1 - pp/(3*tmm)))/(tarC2^n2*tarC4^n4*tarC5^n5) + (tarC1^(-1 - n1)*tarC4^(1 - n4)*(-1 + pp/(3*tmm)))/(tarC2^n2*tarC3^n3*tarC5^n5) + (tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC4^(1 - n4)*tarC5^(1 - n5)*(-(n2/(-1 + n5)) + (n2*pp)/(2*(-1 + n5)*tmm)))/tarC3^n3 + (tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC5^(1 - n5)*((2*n2*pp)/(-1 + n5) - (n2*pp^2)/(2*(-1 + n5)*tmm)))/(tarC3^n3*tarC4^n4) + (n3*pp*tarC1^(-1 - n1)*tarC3^(-1 - n3)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n5)*tarC2^n2*tmm) + ((1 + n1)*pp*tarC1^(-2 - n1)*tarC3^(1 - n3)*tarC5^(1 - n5))/(6*(-1 + n5)*tarC2^n2*tarC4^n4*tmm) + ((1 + n1)*pp*tarC1^(-2 - n1)*tarC2^(1 - n2)*tarC5^(1 - n5))/(3*(-1 + n5)*tarC3^n3*tarC4^n4*tmm) - ((1 + n1)*pp^2*tarC1^(-2 - n1)*tarC5^(1 - n5))/(6*(-1 + n5)*tarC2^n2*tarC3^n3*tarC4^n4*tmm) - (n3*pp*tarC1^(-1 - n1)*tarC3^(-1 - n3)*tarC5^(2 - n5))/(3*(-1 + n5)*tarC2^n2*tarC4^n4*tmm) - ((1 + n1)*pp*tarC1^(-2 - n1)*tarC5^(2 - n5))/(3*(-1 + n5)*tarC2^n2*tarC3^n3*tarC4^n4*tmm) + (tarC1^(-1 - n1)*tarC5^(1 - n5)*((n2 - n4)/(-1 + n5) - (pp*rat(1 + 2*d + n1 - 3*n2 - 6*n4, 1))/(6*(-1 + n5)*tmm)))/(tarC2^n2*tarC3^n3*tarC4^n4);
+
+
+
+*   n1 != 0 && n3 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg_/tarC2^n2?pos_/tarC3^n3?{>1}/tarC4^n4?pos_/tarC5^n5?pos_ = 
+-((n4*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4))/((-1 + n3)*tarC5^n5)) + (tarC1^(-2 - n1)*tarC3^(2 - n3)*((1 + n1)/(-1 + n3) - (5*(1 + n1)*pp)/(6*(-1 + n3)*tmm)))/(tarC2^n2*tarC4^n4*tarC5^n5) + (tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC3^(1 - n3)*tarC4^(1 - n4)*(n2/(-1 + n3) - (n2*pp)/(2*(-1 + n3)*tmm)))/tarC5^n5 + (tarC1^(-2 - n1)*tarC3^(1 - n3)*((-2*(1 + n1)*pp)/(-1 + n3) + (5*(1 + n1)*pp^2)/(6*(-1 + n3)*tmm)))/(tarC2^n2*tarC4^n4*tarC5^n5) + (tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC3^(1 - n3)*((-2*n2*pp)/(-1 + n3) + (n2*pp^2)/(2*(-1 + n3)*tmm)))/(tarC4^n4*tarC5^n5) + (n5*pp*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC4^(1 - n4)*tarC5^(-1 - n5))/(3*(-1 + n3)*tarC2^n2*tmm) - (n5*pp*tarC1^(-1 - n1)*tarC3^(2 - n3)*tarC5^(-1 - n5))/(3*(-1 + n3)*tarC2^n2*tarC4^n4*tmm) + (2*(1 + n1)*pp*tarC1^(-2 - n1)*tarC3^(1 - n3)*tarC5^(1 - n5))/(3*(-1 + n3)*tarC2^n2*tarC4^n4*tmm) + (2*pp*tarC1^(-1 - n1)*tarC5^(1 - n5))/(3*tarC2^n2*tarC3^n3*tarC4^n4*tmm) - (2*pp*tarC1^(-1 - n1)*tarC4^(1 - n4))/(3*tarC2^n2*tarC3^n3*tarC5^n5*tmm) - (2*(1 + n1)*pp*tarC1^(-2 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3))/(3*(-1 + n3)*tarC4^n4*tarC5^n5*tmm) + (tarC1^(-1 - n1)*tarC3^(1 - n3)*((-2 - n1 - n2 + n3 + n4)/(-1 + n3) + (pp*rat(5 + 4*d - n1 - 3*n2 - 6*n3 - 6*n4, 1))/(6*(-1 + n3)*tmm)))/(tarC2^n2*tarC4^n4*tarC5^n5);
+
+
+
+*   n1 != 0 && n2 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg_/tarC2^n2?{>1}/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?pos_ = 
+-((n5*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC4^(1 - n4)*tarC5^(-1 - n5))/((-1 + n2)*tarC3^n3)) + (n5*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3)*tarC5^(-1 - n5))/((-1 + n2)*tarC4^n4) + (n4*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC4^(-1 - n4)*tarC5^(1 - n5))/((-1 + n2)*tarC3^n3) - (n3*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(-1 - n3)*tarC5^(1 - n5))/((-1 + n2)*tarC4^n4) - ((1 + n1)*tarC1^(-2 - n1)*tarC2^(1 - n2)*tarC5^(1 - n5))/((-1 + n2)*tarC3^n3*tarC4^n4) + (tarC1^(-1 - n1)*tarC5^(1 - n5))/(tarC2^n2*tarC3^n3*tarC4^n4) - (n4*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4))/((-1 + n2)*tarC5^n5) + (n3*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(-1 - n3)*tarC4^(1 - n4))/((-1 + n2)*tarC5^n5) - (tarC1^(-1 - n1)*tarC4^(1 - n4))/(2*tarC2^n2*tarC3^n3*tarC5^n5) + ((1 + n1)*tarC1^(-2 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3))/(2*(-1 + n2)*tarC4^n4*tarC5^n5) - ((1 + n1)*pp*tarC1^(-2 - n1)*tarC2^(1 - n2))/(2*(-1 + n2)*tarC3^n3*tarC4^n4*tarC5^n5) + ((-2 - n1 + n2)*tarC1^(-1 - n1)*tarC2^(1 - n2))/(2*(-1 + n2)*tarC3^n3*tarC4^n4*tarC5^n5) + ((1 + n1)*tarC1^(-2 - n1)*tarC2^(2 - n2))/((-1 + n2)*tarC3^n3*tarC4^n4*tarC5^n5) + (pp*tarC1^(-1 - n1))/(2*tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5);
+
+
+
+*   n5 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?{>1} = 
+(2*n3*tarC3^(-1 - n3)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n5)*tarC1^n1*tarC2^n2*tmm) + (n1*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC5^(1 - n5))/(3*(-1 + n5)*tarC2^n2*tarC4^n4*tmm) + (2*n1*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC5^(1 - n5))/(3*(-1 + n5)*tarC3^n3*tarC4^n4*tmm) - (n1*pp*tarC1^(-1 - n1)*tarC5^(1 - n5))/(3*(-1 + n5)*tarC2^n2*tarC3^n3*tarC4^n4*tmm) - (2*n3*tarC3^(-1 - n3)*tarC5^(2 - n5))/(3*(-1 + n5)*tarC1^n1*tarC2^n2*tarC4^n4*tmm) - (2*n1*tarC1^(-1 - n1)*tarC5^(2 - n5))/(3*(-1 + n5)*tarC2^n2*tarC3^n3*tarC4^n4*tmm) - tarC4^(1 - n4)/(3*tarC1^n1*tarC2^n2*tarC3^n3*tarC5^n5*tmm) + tarC3^(1 - n3)/(3*tarC1^n1*tarC2^n2*tarC4^n4*tarC5^n5*tmm) + (tarC5^(1 - n5)*rat(3 + d - n1 - 3*n5, 1))/(3*(-1 + n5)*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tmm);
+
+
+
+*   n4 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?{>1}/tarC5^n5?pos_ = 
+(tarC2^(-1 - n2)*tarC4^(1 - n4)*(-(n2/(-1 + n4)) + (n2*pp)/(2*(-1 + n4)*tmm)))/(tarC1^n1*tarC3^n3*tarC5^n5) + (n5*tarC3^(1 - n3)*tarC4^(1 - n4)*tarC5^(-1 - n5))/(3*(-1 + n4)*tarC1^n1*tarC2^n2*tmm) - (n5*tarC4^(2 - n4)*tarC5^(-1 - n5))/(3*(-1 + n4)*tarC1^n1*tarC2^n2*tarC3^n3*tmm) + (n3*tarC3^(-1 - n3)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n4)*tarC1^n1*tarC2^n2*tmm) + (n1*tarC1^(-1 - n1)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n4)*tarC2^n2*tarC3^n3*tmm) - (n1*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC4^(1 - n4))/(6*(-1 + n4)*tarC2^n2*tarC5^n5*tmm) - (n1*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC4^(1 - n4))/(3*(-1 + n4)*tarC3^n3*tarC5^n5*tmm) + (n1*pp*tarC1^(-1 - n1)*tarC4^(1 - n4))/(6*(-1 + n4)*tarC2^n2*tarC3^n3*tarC5^n5*tmm) - (n3*tarC3^(-1 - n3)*tarC4^(2 - n4))/(3*(-1 + n4)*tarC1^n1*tarC2^n2*tarC5^n5*tmm) - (n2*tarC2^(-1 - n2)*tarC4^(2 - n4))/(2*(-1 + n4)*tarC1^n1*tarC3^n3*tarC5^n5*tmm) + (tarC4^(1 - n4)*rat(6 + 2*d + n1 - 3*n2 - 6*n4, 1))/(6*(-1 + n4)*tarC1^n1*tarC2^n2*tarC3^n3*tarC5^n5*tmm);
+
+
+
+*   n3 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?pos_/tarC3^n3?{>1}/tarC4^n4?pos_/tarC5^n5?pos_ = 
+(tarC1^(-1 - n1)*tarC3^(1 - n3)*(-(n1/(-1 + n3)) + (2*n1*pp)/(3*(-1 + n3)*tmm)))/(tarC2^n2*tarC4^n4*tarC5^n5) + (2*n5*tarC3^(1 - n3)*tarC4^(1 - n4)*tarC5^(-1 - n5))/(3*(-1 + n3)*tarC1^n1*tarC2^n2*tmm) - (2*n5*tarC3^(2 - n3)*tarC5^(-1 - n5))/(3*(-1 + n3)*tarC1^n1*tarC2^n2*tarC4^n4*tmm) + (n1*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC5^(1 - n5))/(3*(-1 + n3)*tarC2^n2*tarC4^n4*tmm) + tarC5^(1 - n5)/(3*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tmm) - tarC4^(1 - n4)/(3*tarC1^n1*tarC2^n2*tarC3^n3*tarC5^n5*tmm) - (n1*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3))/(3*(-1 + n3)*tarC4^n4*tarC5^n5*tmm) - (2*n1*tarC1^(-1 - n1)*tarC3^(2 - n3))/(3*(-1 + n3)*tarC2^n2*tarC4^n4*tarC5^n5*tmm) + (tarC3^(1 - n3)*rat(3 + d - n1 - 3*n3, 1))/(3*(-1 + n3)*tarC1^n1*tarC2^n2*tarC4^n4*tarC5^n5*tmm);
+
+
+
+*   n1 == 0 && n2 != 1 && n2 != 2 && n3 == 1 && n4 == 1 && n5 == 1
+        if((count(tarC1,-1)) == 0) id,only,ifmatch->dopartfrac 1/tarC2^n2?{>2}/tarC3/tarC4/tarC5 =
+(1/(2*pp) + 1/(2*[pp-4*tmm]))/(tarC2^n2*tarC3*tarC5) + (tarC2^(1 - n2)*(-1/(2*(-1 + n2)*pp) - 1/(2*(-1 + n2)*[pp-4*tmm])))/(tarC3^2*tarC4) + (tarC2^(2 - n2)*(-1/(4*(-1 + n2)*pp) + 1/(4*(-1 + n2)*[pp-4*tmm])))/(tarC3^2*tarC4*tarC5) + (tarC2^(1 - n2)*(1/(4*(-1 + n2)*pp) + 3/(4*(-1 + n2)*[pp-4*tmm])))/(tarC3^2*tarC5) + (tarC2^(2 - n2)*(1/((-2 + n2)*(-1 + n2)*pp) - 1/((-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3^3*tarC4) + (tarC2^(2 - n2)*(1/(2*(-2 + n2)*(-1 + n2)*pp) - 1/(2*(-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3^2*tarC5^2) + (tarC2^(2 - n2)*(-1/(2*(-2 + n2)*(-1 + n2)*pp) + 1/(2*(-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3^2*tarC4^2) + (tarC2^(2 - n2)*(-1/(2*(-2 + n2)*(-1 + n2)*pp) + 1/(2*(-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3*tarC4*tarC5^2) + (tarC2^(2 - n2)*(-(1/((-2 + n2)*(-1 + n2)*pp)) + 1/((-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3^3*tarC5) + (tarC2^(2 - n2)*((3 - n2)/(2*(-2 + n2)*(-1 + n2)*pp) + (-3 + n2)/(2*(-2 + n2)*(-1 + n2)*[pp-4*tmm])))/(tarC3*tarC4^2*tarC5) + (tarC2^(1 - n2)*((3 - n2)/(2*(-1 + n2)*pp) + (-3 + n2 - 2*rat(-2 + d - n2, 1))/(2*(-1 + n2)*[pp-4*tmm])))/(tarC3*tarC4*tarC5);
+
+
+
+*   n2 == 1 && n3 == 1 && n4 == 1 && n5 == 1 && n1 != 0
+id,only,ifmatch->sortme 1/tarC1^n1?neg_/tarC2/tarC3/tarC4/tarC5 = 
+(2*pp*tarC1^(-1 - n1)*rat(1, -3 + d - n1))/(tarC2*tarC3^2*tarC4) - rat(1, -3 + d - n1)/(tarC1^n1*tarC2*tarC3^2*tarC4) + (2*(1 + n1)*pp*tarC1^(-2 - n1)*rat(1, -3 + d - n1))/(tarC2*tarC3*tarC4) - (n1*tarC1^(-1 - n1)*rat(1, -3 + d - n1))/(tarC2*tarC3*tarC4) + (pp*tarC1^(-1 - n1)*rat(1, -3 + d - n1))/(tarC2*tarC3*tarC5^2) - (2*rat(1, -3 + d - n1))/(tarC1^n1*tarC2*tarC3*tarC5^2) - (pp*tarC1^(-1 - n1)*rat(1, -3 + d - n1))/(tarC2*tarC4*tarC5^2) + (2*rat(1, -3 + d - n1))/(tarC1^n1*tarC2*tarC4*tarC5^2) - (2*pp*tarC1^(-1 - n1)*rat(1, -3 + d - n1))/(tarC2*tarC3^2*tarC5) + rat(1, -3 + d - n1)/(tarC1^n1*tarC2*tarC3^2*tarC5) + (2*n1*tarC1^(-1 - n1)*rat(1, -3 + d - n1))/(tarC2*tarC4*tarC5) - (2*(1 + n1)*pp*tarC1^(-2 - n1)*rat(1, -3 + d - n1))/(tarC3*tarC4*tarC5) + (n1*tarC1^(-1 - n1)*rat(1, -3 + d - n1))/(tarC3*tarC4*tarC5) - (3*tarC1^(-1 - n1)*tmm*rat(1, -3 + d - n1))/(tarC3*tarC4^2*tarC5) + (tarC1^(-1 - n1)*((-3*pp*rat(1, -3 + d - n1))/2 + 3*tmm*rat(1, -3 + d - n1)))/(tarC2^2*tarC3*tarC5) + (tarC1^(-2 - n1)*((-5*(1 + n1)*pp*rat(1, -3 + d - n1))/2 + 3*(1 + n1)*tmm*rat(1, -3 + d - n1)))/(tarC2*tarC4*tarC5) + (tarC1^(-1 - n1)*((3*pp^2*rat(1, -3 + d - n1))/2 - 6*pp*tmm*rat(1, -3 + d - n1)))/(tarC2^2*tarC3*tarC4*tarC5) + (tarC1^(-2 - n1)*((5*(1 + n1)*pp^2*rat(1, -3 + d - n1))/2 - 6*(1 + n1)*pp*tmm*rat(1, -3 + d - n1)))/(tarC2*tarC3*tarC4*tarC5) + (pp*tarC1^(-1 - n1)*rat(-16 + 4*d - 5*n1, -3 + d - n1))/(2*tarC2*tarC3*tarC4*tarC5);
+
+
+
+*   n1 == 0 && n2 == 2 && n3 == 1 && n4 == 1 && n5 == 1
+if((count(tarC1,-1)) == 0) id,only,ifmatch->dopartfrac 1/tarC1^n1?neg0_/tarC2^2/tarC3/tarC4/tarC5 = 
+rat(1, -3 + d)/(2*tarC2^2*tarC3^2*tarC4) + rat(1, -3 + d)/(2*tarC2^2*tarC4*tarC5^2) - rat(1, -3 + d)/(2*tarC2*tarC3*tarC5^2*[pp-4*tmm]) + rat(1, -3 + d)/(2*tarC2*tarC4*tarC5^2*[pp-4*tmm]) - (2*tmm*rat(1, -3 + d))/(tarC2*tarC3^3*tarC4*[pp-4*tmm]) - (2*tmm*rat(1, -3 + d))/(tarC2*tarC3*tarC5^3*[pp-4*tmm]) + (2*tmm*rat(1, -3 + d))/(tarC2*tarC4*tarC5^3*[pp-4*tmm]) + (2*tmm*rat(1, -3 + d))/(tarC2*tarC3^3*tarC5*[pp-4*tmm]) + ((-3*tmm*rat(1, -3 + d))/(4*pp) + (3*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC3*tarC4^2*tarC5^2) + ((-3*tmm*rat(1, -3 + d))/(4*pp) + (3*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC3^2*tarC4*tarC5^2) + ((-3*tmm*rat(1, -3 + d))/(4*pp) + (3*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC3^2*tarC4^2*tarC5) + (-rat(1, -3 + d)/2 + (3*tmm*rat(1, -3 + d))/(4*pp) + (3*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC2^2*tarC3*tarC5^2) + (-rat(1, -3 + d)/2 + (3*tmm*rat(1, -3 + d))/(4*pp) + (3*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC2^2*tarC3^2*tarC5) + ((3*tmm*rat(1, -3 + d))/(4*pp) + (9*tmm*rat(1, -3 + d))/(4*[pp-4*tmm]))/(tarC2*tarC3^2*tarC5^2) - rat(-3 + d, 1)/(tarC2*tarC3*tarC4*tarC5*[pp-4*tmm]) + rat(-7 + 2*d, -3 + d)/(2*tarC2*tarC3^2*tarC4*[pp-4*tmm]) - rat(-7 + 2*d, -3 + d)/(2*tarC2*tarC3^2*tarC5*[pp-4*tmm]);
+
+
+endif;
+
+* End recursion
+goto endrec;         
+la dopartfrac;
+$nopf = 0;
+la sortme;
+$irep = 0;
+la endrec;
+        
+ModuleOption,minimum,$irep,$nopf;
+.sort:red2l-V-`$repcount++';
+#if `$nopf'==0
+        #call partfrac        
+#endif                
+#redefine irep "`$irep'"
+#enddo
+#endprocedure
+
+
+
+#procedure red01101
+#$repcount = 1;        
+#do irep=1,1
+#$irep = 1;
+* do not need partfrac=1        
+#$nopf = 1;                        
+if(count(intJ,1));
+
+*   n4 != 0 && n5 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?neg_/tarC5^n5?{>1} =
+(n1*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC4^(-1 - n4)*tarC5^(1 - n5))/((-1 + n5)*tarC2^n2) + (tarC3^(1 - n3)*tarC4^(-1 - n4))/(tarC1^n1*tarC2^n2*tarC5^n5) + (2*n3*tarC3^(-1 - n3)*tarC4^(-1 - n4)*tarC5^(1 - n5)*tmm)/((-1 + n5)*tarC1^n1*tarC2^n2) + (tarC4^(-1 - n4)*tmm)/(tarC1^n1*tarC2^n2*tarC3^n3*tarC5^n5) + (tarC1^(-1 - n1)*tarC4^(-1 - n4)*tarC5^(1 - n5)*(-((n1*pp)/(-1 + n5)) + (2*n1*tmm)/(-1 + n5)))/(tarC2^n2*tarC3^n3) - (tarC4^(-1 - n4)*tarC5^(1 - n5)*rat(1 + d - n1 - 2*n3 - n5, 1))/((-1 + n5)*tarC1^n1*tarC2^n2*tarC3^n3);
+
+
+
+*   n1 != 0 && n5 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg_/tarC2^n2?pos_/tarC3^n3?pos_/tarC4^n4?neg0_/tarC5^n5?{>1} =
+(n4*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC4^(-1 - n4)*tarC5^(1 - n5))/((-1 + n5)*tarC3^n3) + (tarC1^(-1 - n1)*tarC2^(1 - n2))/(tarC3^n3*tarC4^n4*tarC5^n5) + (2*n2*tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC5^(1 - n5)*tmm)/((-1 + n5)*tarC3^n3*tarC4^n4) + (tarC1^(-1 - n1)*tmm)/(tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5) + (tarC1^(-1 - n1)*tarC4^(-1 - n4)*tarC5^(1 - n5)*(-((n4*pp)/(-1 + n5)) + (2*n4*tmm)/(-1 + n5)))/(tarC2^n2*tarC3^n3) - (tarC1^(-1 - n1)*tarC5^(1 - n5)*rat(1 + d - 2*n2 - n4 - n5, 1))/((-1 + n5)*tarC2^n2*tarC3^n3*tarC4^n4);
+
+
+
+*   n3 != 1 && n4 != 0
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?pos_/tarC3^n3?{>1}/tarC4^n4?neg_/tarC5^n5?pos_ =
+(n1*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC4^(-1 - n4)*tarC5^(1 - n5))/((-1 + n3)*tarC2^n2) + (tarC4^(-1 - n4)*tarC5^(1 - n5))/(tarC1^n1*tarC2^n2*tarC3^n3) - (n1*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4))/((-1 + n3)*tarC5^n5) + (2*n5*tarC3^(1 - n3)*tarC4^(-1 - n4)*tarC5^(-1 - n5)*tmm)/((-1 + n3)*tarC1^n1*tarC2^n2) + (n1*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC4^(-1 - n4)*tmm)/((-1 + n3)*tarC2^n2*tarC5^n5) + (tarC4^(-1 - n4)*tmm)/(tarC1^n1*tarC2^n2*tarC3^n3*tarC5^n5) - (tarC3^(1 - n3)*tarC4^(-1 - n4)*rat(1 + d - n1 - n3 - 2*n5, 1))/((-1 + n3)*tarC1^n1*tarC2^n2*tarC5^n5);
+
+
+
+*   n1 != 0 && n3 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg_/tarC2^n2?pos_/tarC3^n3?{>1}/tarC4^n4?neg0_/tarC5^n5?pos_ =
+-((n4*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4))/((-1 + n3)*tarC5^n5)) + (tarC1^(-1 - n1)*(pp - 2*tmm))/(tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5) - (2*n5*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC5^(-1 - n5)*tmm)/((-1 + n3)*tarC2^n2*tarC4^n4) - (2*n2*tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC3^(1 - n3)*tmm)/((-1 + n3)*tarC4^n4*tarC5^n5) - (2*(1 + n1)*tarC1^(-2 - n1)*tarC3^(1 - n3)*tmm)/((-1 + n3)*tarC2^n2*tarC4^n4*tarC5^n5) + (tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC4^(-1 - n4)*((n4*pp)/(-1 + n3) - (2*n4*tmm)/(-1 + n3)))/(tarC2^n2*tarC5^n5) + (tarC1^(-1 - n1)*tarC3^(1 - n3)*rat(-1 + 2*d - 2*n1 - 2*n2 - n3 - n4 - 2*n5, 1))/((-1 + n3)*tarC2^n2*tarC4^n4*tarC5^n5);
+
+
+
+*   n2 != 1 && n4 != 0
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?{>1}/tarC3^n3?pos_/tarC4^n4?neg_/tarC5^n5?pos_ =
+-((n1*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4))/((-1 + n2)*tarC5^n5)) + (tarC4^(-1 - n4)*(pp - 2*tmm))/(tarC1^n1*tarC2^n2*tarC3^n3*tarC5^n5) - (2*n5*tarC2^(1 - n2)*tarC4^(-1 - n4)*tarC5^(-1 - n5)*tmm)/((-1 + n2)*tarC1^n1*tarC3^n3) - (2*(1 + n4)*tarC2^(1 - n2)*tarC4^(-2 - n4)*tmm)/((-1 + n2)*tarC1^n1*tarC3^n3*tarC5^n5) - (2*n3*tarC2^(1 - n2)*tarC3^(-1 - n3)*tarC4^(-1 - n4)*tmm)/((-1 + n2)*tarC1^n1*tarC5^n5) + (tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC4^(-1 - n4)*((n1*pp)/(-1 + n2) - (2*n1*tmm)/(-1 + n2)))/(tarC3^n3*tarC5^n5) + (tarC2^(1 - n2)*tarC4^(-1 - n4)*rat(-1 + 2*d - n1 - n2 - 2*n3 - 2*n4 - 2*n5, 1))/((-1 + n2)*tarC1^n1*tarC3^n3*tarC5^n5);
+
+
+
+*   n1 != 0 && n2 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg_/tarC2^n2?{>1}/tarC3^n3?pos_/tarC4^n4?neg0_/tarC5^n5?pos_ =
+(n4*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC4^(-1 - n4)*tarC5^(1 - n5))/((-1 + n2)*tarC3^n3) + (tarC1^(-1 - n1)*tarC5^(1 - n5))/(tarC2^n2*tarC3^n3*tarC4^n4) - (n4*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4))/((-1 + n2)*tarC5^n5) + (2*n5*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC5^(-1 - n5)*tmm)/((-1 + n2)*tarC3^n3*tarC4^n4) + (n4*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC4^(-1 - n4)*tmm)/((-1 + n2)*tarC3^n3*tarC5^n5) + (tarC1^(-1 - n1)*tmm)/(tarC2^n2*tarC3^n3*tarC4^n4*tarC5^n5) - (tarC1^(-1 - n1)*tarC2^(1 - n2)*rat(1 + d - n2 - n4 - 2*n5, 1))/((-1 + n2)*tarC3^n3*tarC4^n4*tarC5^n5);
+
+
+
+*   n1 == 0 && n4 == 0 && n5 != 1 && n5 != 2
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,ifmatch->sortme 1/tarC2^n2?pos_/tarC3^n3?pos_/tarC5^n5?{>2} =
+-((n2*tarC2^(-1 - n2)*tarC5^(1 - n5))/((-1 + n5)*tarC3^n3)) - (n2*n3*tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC5^(2 - n5))/((-2 + n5)*(-1 + n5)) + (tarC3^(-1 - n3)*tarC5^(1 - n5)*((-3*n3)/(2*(-1 + n5)) + (n3*pp)/(2*(-1 + n5)*tmm)))/tarC2^n2 - (n3*tarC2^(1 - n2)*tarC3^(-1 - n3)*tarC5^(1 - n5))/(2*(-1 + n5)*tmm) + (tarC5^(1 - n5)*rat(2 + 2*d - 2*n2 - n3 - 2*n5, 1))/(2*(-1 + n5)*tarC2^n2*tarC3^n3*tmm) + (n3*tarC3^(-1 - n3)*tarC5^(2 - n5)*rat(2 + d - 2*n2 - n5, 1))/(2*(-2 + n5)*(-1 + n5)*tarC2^n2*tmm);
+
+
+
+*   n1 == 0 && n4 == 0 && n5 == 2 && n3 != 1
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->dopartfrac 1/tarC2^n2?pos_/tarC3^n3?{>1}/tarC5^2 =
+tarC2^(1 - n2)/(tarC3^n3*tarC5^2*[pp-3*tmm]) + (2*n2*tarC2^(-1 - n2)*tarC3^(1 - n3)*tmm)/((-1 + n3)*tarC5^2*[pp-3*tmm]) + (2*n3*tarC3^(-1 - n3)*tmm)/(tarC2^n2*tarC5*[pp-3*tmm]) + (2*n2*tarC2^(-1 - n2)*tmm)/(tarC3^n3*tarC5*[pp-3*tmm]) - rat(-1 + 2*d - 2*n2 - 2*n3, 1)/(tarC2^n2*tarC3^n3*tarC5*[pp-3*tmm]) - (tarC3^(1 - n3)*rat(1 + d - 2*n2 - n3, 1))/((-1 + n3)*tarC2^n2*tarC5^2*[pp-3*tmm]);
+
+
+
+*   n1 == 0 && n3 != 1 && n3 != 2 && n4 == 0 && n5 == 1
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->sortme 1/tarC2^n2?pos_/tarC3^n3?{>2}/tarC5 =
+(n2*(1 + n2)*tarC2^(-2 - n2)*tarC3^(2 - n3))/((-2 + n3)*(-1 + n3)*tarC5) + (n2*tarC2^(-1 - n2)*tarC3^(2 - n3)*rat(2 - d + 2*n2, 1))/(2*(-2 + n3)*(-1 + n3)*tarC5*tmm) + (tarC3^(1 - n3)*rat(2 + d - 2*n3, 1))/(2*(-1 + n3)*tarC2^n2*tarC5*tmm);
+
+
+
+*   n2 == 1 && n3 == 1 && n5 == 1 && n4 != 0
+id,only,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2/tarC3/tarC4^n4?neg_/tarC5 =
+(n4*tarC4^(-1 - n4)*rat(1, -3 + d - n4))/(tarC1^n1*tarC2*tarC3) + rat(1, -3 + d - n4)/(tarC1^n1*tarC2^2*tarC3*tarC4^n4) + ((-1 + n1 - n4)*tarC4^(-1 - n4)*rat(1, -3 + d - n4))/(tarC1^n1*tarC2*tarC5) + (2*tarC4^(-1 - n4)*tmm*rat(1, -3 + d - n4))/(tarC1^n1*tarC2*tarC5^2) + (2*tarC4^(-1 - n4)*tmm*rat(1, -3 + d - n4))/(tarC1^n1*tarC3*tarC5^2) + (2*(1 + n4)*tarC1^(1 - n1)*tarC4^(-2 - n4)*tmm*rat(1, -3 + d - n4))/(tarC2*tarC3*tarC5) - ((1 + n4)*pp*tarC4^(-2 - n4)*tmm*rat(1, -3 + d - n4))/(tarC1^n1*tarC2*tarC3*tarC5) + (n1*tarC1^(-1 - n1)*tarC4^(-1 - n4)*tmm*rat(1, -3 + d - n4))/(tarC2*tarC5) + (tarC4^(-1 - n4)*(-(pp*rat(1, -3 + d - n4)) + 2*tmm*rat(1, -3 + d - n4)))/(tarC1^n1*tarC2^2*tarC3) + (tarC4^(-2 - n4)*((1 + n4)*pp*rat(1, -3 + d - n4) - 2*(1 + n4)*tmm*rat(1, -3 + d - n4)))/(tarC1^n1*tarC2*tarC5) + (tarC4^(-2 - n4)*(-((1 + n4)*pp*rat(1, -3 + d - n4)) + 2*(1 + n4)*tmm*rat(1, -3 + d - n4)))/(tarC1^n1*tarC2*tarC3) + (tarC4^(-1 - n4)*(2*pp*tmm*rat(1, -3 + d - n4) - 2*tmm^2*rat(1, -3 + d - n4)))/(tarC1^n1*tarC2*tarC3^2*tarC5) + (tarC4^(-1 - n4)*(-2*pp*tmm*rat(1, -3 + d - n4) + 2*tmm^2*rat(1, -3 + d - n4)))/(tarC1^n1*tarC2*tarC3*tarC5^2) + (tarC1^(-1 - n1)*tarC4^(-1 - n4)*(-(n1*pp*tmm*rat(1, -3 + d - n4)) - 2*n1*tmm^2*rat(1, -3 + d - n4)))/(tarC2*tarC3*tarC5) - (tarC1^(1 - n1)*tarC4^(-1 - n4)*rat(-6 + 2*d - n1 - 2*n4, -3 + d - n4))/(tarC2*tarC3*tarC5) + (tarC4^(-1 - n4)*(-((-1 + n1 - n4)*tmm*rat(1, -3 + d - n4)) + pp*rat(-3 + d - n1 - n4, -3 + d - n4)))/(tarC1^n1*tarC2*tarC3*tarC5);
+
+
+
+*   n1 == 0 && n3 == 1 && n4 == 0 && n5 == 2 && n2 != 1
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,ifmatch->dopartfrac 1/tarC2^n2?{>1}/tarC3/tarC5^2 =
+(n2*tarC2^(-1 - n2))/(tarC3*tarC5) - (2*tarC2^(1 - n2))/((-1 + n2)*tarC5^3*[pp-tmm]) - (2*tarC2^(2 - n2))/((-1 + n2)*tarC3*tarC5^3*[pp-tmm]) + (tarC2^(2 - n2)*rat(-4 + d, 1))/(2*(-1 + n2)*tarC3*tarC5^2*tmm*[pp-tmm]) - (tarC2^(1 - n2)*rat((-3 + d)*(3*d - 4*n2), 1))/(2*(-1 + n2)*tarC3*tarC5*tmm*[pp-tmm]) + (-rat(d - 2*n2, 1)/(2*tmm) + (-rat(d - 2*n2, 1) + rat(-6 + 3*d - 2*n2, 1))/(2*[pp-tmm]))/(tarC2^n2*tarC3*tarC5) + (tarC2^(1 - n2)*rat(-1 + d - n2, 1))/((-1 + n2)*tarC3*tarC5^2*[pp-tmm]) + (2*tarC2^(1 - n2)*rat(-1 + d - n2, 1))/((-1 + n2)*tarC3^2*tarC5*[pp-tmm]) + (tarC2^(1 - n2)*rat(-1 + d - n2, 1))/((-1 + n2)*tarC5^2*tmm*[pp-tmm]);
+
+
+
+*   n1 == 0 && n3 == 2 && n4 == 0 && n5 == 1 && n2 != 1
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->dopartfrac 1/tarC2^n2?{>1}/tarC3^2/tarC5 =
+(n2*tarC2^(-1 - n2))/(tarC3*tarC5) + (-1/(2*tmm) + 1/(2*[pp-tmm]))/(tarC2^n2*tarC3^2) + (tarC2^(1 - n2)*(1/((-1 + n2)*tmm) + 1/((1 - n2)*[pp-tmm])))/tarC3^3 - (tarC1*tarC2^(1 - n2))/((-1 + n2)*tarC3^3*tmm*[pp-tmm]) + tarC4/(2*tarC2^n2*tarC3^2*tmm*[pp-tmm]) + ((rat(-2 + 3*d - 4*n2, 1) - rat(d - 2*n2, 1))/(2*[pp-tmm]) - rat(d - 2*n2, 1)/(2*tmm))/(tarC2^n2*tarC3*tarC5) + (2*tarC2^(1 - n2)*rat(-1 + d - n2, 1))/((-1 + n2)*tarC3*tarC5^2*[pp-tmm]) + (tarC2^(1 - n2)*rat(-1 + d - n2, 1))/((-1 + n2)*tarC3^2*tarC5*[pp-tmm]) + (tarC2^(1 - n2)*rat(-1 + d - n2, 1))/(2*(-1 + n2)*tarC3^2*tmm*[pp-tmm]) - (tarC2^(1 - n2)*rat((-4 + 3*d - 2*n2)*(-1 + d - n2), 1))/(2*(-1 + n2)*tarC3*tarC5*tmm*[pp-tmm]);
+
+
+
+*   n1 == 0 && n2 != 1 && n2 != 2 && n3 == 1 && n4 == 0 && n5 == 1
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->dopartfrac 1/tarC2^n2?{>2}/tarC3/tarC5 =
+(-1/(2*tmm) + 1/(4*[pp-tmm]) - 7/(4*[pp-9*tmm]))/(tarC2^n2*tarC3) + (tarC2^(1 - n2)*(-1/(4*(-1 + n2)*[pp-tmm]) + 1/(4*(-1 + n2)*[pp-9*tmm])))/tarC5^2 + (tarC2^(1 - n2)*(1/(2*(-1 + n2)*tmm) - 1/(8*(-1 + n2)*[pp-tmm]) + 13/(8*(-1 + n2)*[pp-9*tmm])))/tarC3^2 + (tarC2^(3 - n2)*(-1/(4*(-2 + n2)*(-1 + n2)*[pp-tmm]) + 1/(4*(-2 + n2)*(-1 + n2)*[pp-9*tmm])))/(tarC3^2*tarC5^2) + (tarC4*(1/(4*tmm*[pp-tmm]) + 1/(4*tmm*[pp-9*tmm])))/(tarC2^n2*tarC3) + (tarC1*tarC2^(1 - n2)*(-3/(8*(-1 + n2)*tmm*[pp-tmm]) - 1/(8*(-1 + n2)*tmm*[pp-9*tmm])))/tarC3^2 + (tarC2^(1 - n2)*((-rat(29*d - 32*n2, 1) + 2*rat(7 + 7*d - 11*n2, 1) - rat(2 + d - 2*n2, 1))/(16*(-1 + n2)*[pp-tmm]) + rat(2 + d - 2*n2, 1)/(2*(-1 + n2)*tmm) + (rat(29*d - 32*n2, 1) - 18*rat(7 + 7*d - 11*n2, 1) + 81*rat(2 + d - 2*n2, 1))/(16*(-1 + n2)*[pp-9*tmm])))/(tarC3*tarC5) + (tarC2^(1 - n2)*((rat(2 + 3*d - 5*n2, 1) - 9*rat(d - n2, 1))/(16*(-1 + n2)*tmm*[pp-9*tmm]) + (-rat(2 + 3*d - 5*n2, 1) + rat(d - n2, 1))/(16*(-1 + n2)*tmm*[pp-tmm])))/tarC3 + (tarC2^(2 - n2)*((rat(-3 + 5*d - 4*n2, 1) - 9*rat(d - n2, 1))/(4*(-2 + n2)*(-1 + n2)*[pp-9*tmm]) + (-rat(-3 + 5*d - 4*n2, 1) + rat(d - n2, 1))/(4*(-2 + n2)*(-1 + n2)*[pp-tmm])))/(tarC3*tarC5^2) + (tarC2^(2 - n2)*((rat(-3 + 5*d - 4*n2, 1) - 9*rat(d - n2, 1))/(4*(-2 + n2)*(-1 + n2)*[pp-9*tmm]) + (-rat(-3 + 5*d - 4*n2, 1) + rat(d - n2, 1))/(4*(-2 + n2)*(-1 + n2)*[pp-tmm])))/(tarC3^2*tarC5) + (tarC2^(2 - n2)*((3*rat((-2 + 3*d - 2*n2)*(d - n2), 1))/(8*(-2 + n2)*(-1 + n2)*tmm*[pp-tmm]) + rat((-2 + 3*d - 2*n2)*(d - n2), 1)/(8*(-2 + n2)*(-1 + n2)*tmm*[pp-9*tmm])))/(tarC3*tarC5);
+
+
+
+*   n2 == 1 && n3 == 1 && n4 == 0 && n5 == 1 && n1 != 0
+if(count(tarC4,-1) == 0) id,only,ifmatch->sortme 1/tarC1^n1?neg_/tarC2/tarC3/tarC5 =
+(2*tarC1^(-1 - n1)*tarC4*rat(1, -8 + 3*d - 2*n1))/(tarC2^2*tarC3) + (2*(1 + n1)*tarC1^(-1 - n1)*rat(1, -8 + 3*d - 2*n1))/(tarC2*tarC5) + (2*(1 + n1)*tarC1^(-2 - n1)*tmm*rat(1, -8 + 3*d - 2*n1))/(tarC2*tarC5) + (tarC1^(-1 - n1)*(-2*pp*rat(1, -8 + 3*d - 2*n1) + 4*tmm*rat(1, -8 + 3*d - 2*n1)))/(tarC2^2*tarC3) + (tarC1^(-1 - n1)*(4*pp*tmm*rat(1, -8 + 3*d - 2*n1) - 4*tmm^2*rat(1, -8 + 3*d - 2*n1)))/(tarC2*tarC3^2*tarC5) - rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1))/(tarC1^n1*tarC2*tarC3^2) + ((1 + n1)*tarC1^(-1 - n1)*rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1)))/(tarC3*tarC5) - (2*(1 + n1)*tarC1^(-2 - n1)*tarC4*tmm*rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1)))/(tarC2*tarC3*tarC5) + (tarC1^(-1 - n1)*(pp*rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1)) - 2*tmm*rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1))))/(tarC2*tarC3^2) + (tarC1^(-2 - n1)*((1 + n1)*pp*rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1)) - 2*(1 + n1)*tmm*rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1))))/(tarC2*tarC3) + (tarC1^(-2 - n1)*(-((1 + n1)*pp*rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1))) + 2*(1 + n1)*tmm*rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1))))/(tarC3*tarC5) + (tarC1^(-1 - n1)*(-2*pp*tmm*rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1)) + 2*tmm^2*rat(-2 + d, (-8 + 3*d - 2*n1)*(-3 + d - n1))))/(tarC2^2*tarC3*tarC5) + (2*tarC1^(-1 - n1)*tmm*rat(-4 + d - 2*n1, (-8 + 3*d - 2*n1)*(-3 + d - n1)))/(tarC2*tarC5^2) + (2*tarC1^(-1 - n1)*tmm*rat(-4 + d - 2*n1, (-8 + 3*d - 2*n1)*(-3 + d - n1)))/(tarC3*tarC5^2) + (tarC1^(-1 - n1)*(-2*pp*tmm*rat(-4 + d - 2*n1, (-8 + 3*d - 2*n1)*(-3 + d - n1)) + 2*tmm^2*rat(-4 + d - 2*n1, (-8 + 3*d - 2*n1)*(-3 + d - n1))))/(tarC2*tarC3*tarC5^2) + (tarC1^(-2 - n1)*(-((1 + n1)*pp*tmm*rat(-4 + d - 2*n1, (-8 + 3*d - 2*n1)*(-3 + d - n1))) - 4*(1 + n1)*tmm^2*rat(-3 + d - n1, (-8 + 3*d - 2*n1)*(-3 + d - n1))))/(tarC2*tarC3*tarC5) + (tarC1^(-1 - n1)*(-((1 + n1)*tmm*rat(-8 + 3*d - 2*n1, (-8 + 3*d - 2*n1)*(-3 + d - n1))) + pp*rat((-4 + d - 2*n1)*(-3 + d - n1), (-8 + 3*d - 2*n1)*(-3 + d - n1))))/(tarC2*tarC3*tarC5) - (tarC1^(-1 - n1)*rat(-6 + 2*d - 4*n1 + d*n1, (-8 + 3*d - 2*n1)*(-3 + d - n1)))/(tarC2*tarC3);
+
+
+
+*   n1 == 0 && n2 == 1 && n3 == 1 && n4 == 0 && n5 == 2
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->sortme 1/tarC2/tarC3/tarC5^2 = 1/(tarC2*tarC3^2*tarC5);
+
+
+
+*   n1 == 0 && n2 == 1 && n3 == 2 && n4 == 0 && n5 == 1
+if((count(tarC1,-1) == 0) && (count(tarC4,-1) == 0)) id,only,ifmatch->sortme 1/tarC2/tarC3^2/tarC5 = 1/(tarC2^2*tarC3*tarC5);
+
+endif;
+
+* End recursion
+goto endrec;
+la dopartfrac;
+$nopf = 0;
+la sortme;
+$irep = 0;
+la endrec;
+        
+ModuleOption,minimum,$irep,$nopf;
+.sort:red2l-J-`$repcount++';
+#if `$nopf'==0
+        #call partfrac        
+#endif                
+#redefine irep "`$irep'"
+#enddo
+#endprocedure
+
+
+
+
+#procedure red00111
+#$repcount = 1;        
+#do irep=1,1
+#$irep = 1;                
+if(count(intT2,1));
+
+*   n2 != 0 && n5 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?neg_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?{>1} =
+(n3*tarC1^(1 - n1)*tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC5^(1 - n5))/((-1 + n5)*tarC4^n4) + (tarC1^(1 - n1)*tarC2^(-1 - n2))/(tarC3^n3*tarC4^n4*tarC5^n5) + (tarC1^(-1 - n1)*tarC5^(1 - n5)*(n1/(-1 + n5) - (n1*pp)/(3*(-1 + n5)*tmm)))/(tarC2^n2*tarC3^n3*tarC4^n4) + (tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC5^(2 - n5)*(-(n1/(-1 + n5)) + (n1*pp)/(3*(-1 + n5)*tmm)))/(tarC3^n3*tarC4^n4) + (tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC3^(1 - n3)*tarC5^(1 - n5)*(-n1/(2*(-1 + n5)) + (n1*pp)/(3*(-1 + n5)*tmm)))/tarC4^n4 + (tarC2^(-2 - n2)*tarC5^(2 - n5)*((1 + n2)/(-1 + n5) - (2*(1 + n2)*pp)/(3*(-1 + n5)*tmm)))/(tarC1^n1*tarC3^n3*tarC4^n4) + (tarC2^(-2 - n2)*tarC4^(1 - n4)*tarC5^(1 - n5)*(-(1 + n2)/(2*(-1 + n5)) + ((1 + n2)*pp)/(3*(-1 + n5)*tmm)))/(tarC1^n1*tarC3^n3) + (tarC1^(1 - n1)*tarC2^(-2 - n2)*tarC5^(1 - n5)*(-((1 + n2)/(-1 + n5)) + (2*(1 + n2)*pp)/(3*(-1 + n5)*tmm)))/(tarC3^n3*tarC4^n4) + (tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC4^(1 - n4)*tarC5^(1 - n5)*(n3/(-1 + n5) - (n3*pp)/(3*(-1 + n5)*tmm)))/tarC1^n1 + (tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC5^(2 - n5)*(-(n3/(-1 + n5)) + (n3*pp)/(3*(-1 + n5)*tmm)))/(tarC1^n1*tarC4^n4) + (tarC2^(-1 - n2)*tarC4^(-1 - n4)*tarC5^(2 - n5)*(n4/(-1 + n5) - (2*n4*pp)/(3*(-1 + n5)*tmm)))/(tarC1^n1*tarC3^n3) + (tarC2^(-1 - n2)*tarC3^(1 - n3)*tarC4^(-1 - n4)*tarC5^(1 - n5)*(-(n4/(-1 + n5)) + (2*n4*pp)/(3*(-1 + n5)*tmm)))/tarC1^n1 + (tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC5^(1 - n5)*((3*n1*pp)/(2*(-1 + n5)) - (n1*pp^2)/(3*(-1 + n5)*tmm)))/(tarC3^n3*tarC4^n4) + (tarC2^(-2 - n2)*tarC5^(1 - n5)*(((1 + n2)*pp)/(2*(-1 + n5)) - ((1 + n2)*pp^2)/(3*(-1 + n5)*tmm)))/(tarC1^n1*tarC3^n3*tarC4^n4) + (tarC2^(-1 - n2)*tarC5^(1 - n5)*((1 + n1 + n2 - 2*n3)/(2*(-1 + n5)) - (pp*rat(1 + d - 2*n1 + n2 - 3*n3, 1))/(3*(-1 + n5)*tmm)))/(tarC1^n1*tarC3^n3*tarC4^n4);
+
+
+
+*   n2 != 0 && n4 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?neg_/tarC3^n3?pos_/tarC4^n4?{>1}/tarC5^n5?pos_ =
+-((n3*tarC1^(1 - n1)*tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC4^(1 - n4))/((-1 + n4)*tarC5^n5)) + (tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC3^(1 - n3)*tarC4^(1 - n4)*(n1/(-1 + n4) - (2*n1*pp)/(3*(-1 + n4)*tmm)))/tarC5^n5 + (tarC2^(-2 - n2)*tarC4^(2 - n4)*((1 + n2)/(-1 + n4) - (2*(1 + n2)*pp)/(3*(-1 + n4)*tmm)))/(tarC1^n1*tarC3^n3*tarC5^n5) + (tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC4^(1 - n4)*((-2*n1*pp)/(-1 + n4) + (2*n1*pp^2)/(3*(-1 + n4)*tmm)))/(tarC3^n3*tarC5^n5) + (tarC2^(-2 - n2)*tarC4^(1 - n4)*((-2*(1 + n2)*pp)/(-1 + n4) + (2*(1 + n2)*pp^2)/(3*(-1 + n4)*tmm)))/(tarC1^n1*tarC3^n3*tarC5^n5) + (n3*pp*tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n4)*tarC1^n1*tmm) + ((1 + n2)*pp*tarC2^(-2 - n2)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n4)*tarC1^n1*tarC3^n3*tmm) + (n1*pp*tarC1^(-1 - n1)*tarC2^(-1 - n2)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n4)*tarC3^n3*tmm) + (pp*tarC2^(-1 - n2)*tarC5^(1 - n5))/(3*tarC1^n1*tarC3^n3*tarC4^n4*tmm) - ((1 + n2)*pp*tarC1^(1 - n1)*tarC2^(-2 - n2)*tarC4^(1 - n4))/(3*(-1 + n4)*tarC3^n3*tarC5^n5*tmm) - (n1*pp*tarC1^(-1 - n1)*tarC4^(1 - n4))/(3*(-1 + n4)*tarC2^n2*tarC3^n3*tarC5^n5*tmm) - (n3*pp*tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC4^(2 - n4))/(3*(-1 + n4)*tarC1^n1*tarC5^n5*tmm) - (pp*tarC2^(-1 - n2)*tarC3^(1 - n3))/(3*tarC1^n1*tarC4^n4*tarC5^n5*tmm) + (tarC2^(-1 - n2)*tarC4^(1 - n4)*((-2 - n1 - n2 + n3 + n4)/(-1 + n4) + (pp*rat(2 + 2*d - n1 - n2 - 3*n3 - 3*n4, 1))/(3*(-1 + n4)*tmm)))/(tarC1^n1*tarC3^n3*tarC5^n5);
+
+
+
+*   n5 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?neg0_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?{>1} =
+(n4*tarC3^(1 - n3)*tarC4^(-1 - n4)*tarC5^(1 - n5))/(3*(-1 + n5)*tarC1^n1*tarC2^n2*tmm) + (n3*tarC3^(-1 - n3)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n5)*tarC1^n1*tarC2^n2*tmm) + (n2*tarC2^(-1 - n2)*tarC4^(1 - n4)*tarC5^(1 - n5))/(6*(-1 + n5)*tarC1^n1*tarC3^n3*tmm) + (n1*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC5^(1 - n5))/(6*(-1 + n5)*tarC2^n2*tarC4^n4*tmm) + (n2*tarC1^(1 - n1)*tarC2^(-1 - n2)*tarC5^(1 - n5))/(3*(-1 + n5)*tarC3^n3*tarC4^n4*tmm) - (n2*pp*tarC2^(-1 - n2)*tarC5^(1 - n5))/(6*(-1 + n5)*tarC1^n1*tarC3^n3*tarC4^n4*tmm) + (n1*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC5^(1 - n5))/(3*(-1 + n5)*tarC3^n3*tarC4^n4*tmm) - (n1*pp*tarC1^(-1 - n1)*tarC5^(1 - n5))/(6*(-1 + n5)*tarC2^n2*tarC3^n3*tarC4^n4*tmm) - (n4*tarC4^(-1 - n4)*tarC5^(2 - n5))/(3*(-1 + n5)*tarC1^n1*tarC2^n2*tarC3^n3*tmm) - (n3*tarC3^(-1 - n3)*tarC5^(2 - n5))/(3*(-1 + n5)*tarC1^n1*tarC2^n2*tarC4^n4*tmm) - (n2*tarC2^(-1 - n2)*tarC5^(2 - n5))/(3*(-1 + n5)*tarC1^n1*tarC3^n3*tarC4^n4*tmm) - (n1*tarC1^(-1 - n1)*tarC5^(2 - n5))/(3*(-1 + n5)*tarC2^n2*tarC3^n3*tarC4^n4*tmm) + (tarC5^(1 - n5)*rat(6 + 2*d - n1 - n2 - 6*n5, 1))/(6*(-1 + n5)*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tmm);
+
+
+
+*   n4 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?neg0_/tarC3^n3?pos_/tarC4^n4?{>1}/tarC5^n5?pos_ =
+(tarC2^(-1 - n2)*tarC4^(1 - n4)*(-(n2/(-1 + n4)) + (n2*pp)/(3*(-1 + n4)*tmm)))/(tarC1^n1*tarC3^n3*tarC5^n5) + (2*n3*tarC3^(-1 - n3)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n4)*tarC1^n1*tarC2^n2*tmm) - (n2*tarC2^(-1 - n2)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n4)*tarC1^n1*tarC3^n3*tmm) + (2*n1*tarC1^(-1 - n1)*tarC4^(1 - n4)*tarC5^(1 - n5))/(3*(-1 + n4)*tarC2^n2*tarC3^n3*tmm) - tarC5^(1 - n5)/(3*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tmm) - (n1*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC4^(1 - n4))/(3*(-1 + n4)*tarC2^n2*tarC5^n5*tmm) + (n2*tarC1^(1 - n1)*tarC2^(-1 - n2)*tarC4^(1 - n4))/(3*(-1 + n4)*tarC3^n3*tarC5^n5*tmm) - (2*n1*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC4^(1 - n4))/(3*(-1 + n4)*tarC3^n3*tarC5^n5*tmm) + (n1*pp*tarC1^(-1 - n1)*tarC4^(1 - n4))/(3*(-1 + n4)*tarC2^n2*tarC3^n3*tarC5^n5*tmm) - (2*n3*tarC3^(-1 - n3)*tarC4^(2 - n4))/(3*(-1 + n4)*tarC1^n1*tarC2^n2*tarC5^n5*tmm) - (n2*tarC2^(-1 - n2)*tarC4^(2 - n4))/(3*(-1 + n4)*tarC1^n1*tarC3^n3*tarC5^n5*tmm) + tarC3^(1 - n3)/(3*tarC1^n1*tarC2^n2*tarC4^n4*tarC5^n5*tmm) + (tarC4^(1 - n4)*rat(3 + d + n1 - 2*n2 - 3*n4, 1))/(3*(-1 + n4)*tarC1^n1*tarC2^n2*tarC3^n3*tarC5^n5*tmm);
+
+
+
+*   n3 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?neg0_/tarC3^n3?{>1}/tarC4^n4?pos_/tarC5^n5?pos_ =
+(tarC1^(-1 - n1)*tarC3^(1 - n3)*(-(n1/(-1 + n3)) + (n1*pp)/(3*(-1 + n3)*tmm)))/(tarC2^n2*tarC4^n4*tarC5^n5) + (2*n4*tarC3^(1 - n3)*tarC4^(-1 - n4)*tarC5^(1 - n5))/(3*(-1 + n3)*tarC1^n1*tarC2^n2*tmm) + (2*n2*tarC2^(-1 - n2)*tarC3^(1 - n3)*tarC5^(1 - n5))/(3*(-1 + n3)*tarC1^n1*tarC4^n4*tmm) - (n1*tarC1^(-1 - n1)*tarC3^(1 - n3)*tarC5^(1 - n5))/(3*(-1 + n3)*tarC2^n2*tarC4^n4*tmm) - tarC5^(1 - n5)/(3*tarC1^n1*tarC2^n2*tarC3^n3*tarC4^n4*tmm) - (2*n4*tarC3^(2 - n3)*tarC4^(-1 - n4))/(3*(-1 + n3)*tarC1^n1*tarC2^n2*tarC5^n5*tmm) - (n2*tarC2^(-1 - n2)*tarC3^(1 - n3)*tarC4^(1 - n4))/(3*(-1 + n3)*tarC1^n1*tarC5^n5*tmm) + tarC4^(1 - n4)/(3*tarC1^n1*tarC2^n2*tarC3^n3*tarC5^n5*tmm) - (2*n2*tarC1^(1 - n1)*tarC2^(-1 - n2)*tarC3^(1 - n3))/(3*(-1 + n3)*tarC4^n4*tarC5^n5*tmm) + (n2*pp*tarC2^(-1 - n2)*tarC3^(1 - n3))/(3*(-1 + n3)*tarC1^n1*tarC4^n4*tarC5^n5*tmm) + (n1*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(1 - n3))/(3*(-1 + n3)*tarC4^n4*tarC5^n5*tmm) - (n1*tarC1^(-1 - n1)*tarC3^(2 - n3))/(3*(-1 + n3)*tarC2^n2*tarC4^n4*tarC5^n5*tmm) + (tarC3^(1 - n3)*rat(3 + d - 2*n1 + n2 - 3*n3, 1))/(3*(-1 + n3)*tarC1^n1*tarC2^n2*tarC4^n4*tarC5^n5*tmm);
+
+
+
+*   n5 != 1
+id,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?neg0_/tarC3^n3?pos_/tarC4^n4?pos_/tarC5^n5?{>1} =
+(n4*tarC4^(-1 - n4)*tarC5^(1 - n5))/((-1 + n5)*tarC1^n1*tarC2^n2*tarC3^n3) - ((1 + n3)*tarC3^(-2 - n3)*tarC4^(1 - n4)*tarC5^(1 - n5))/((-1 + n5)*tarC1^n1*tarC2^n2) + (n2*tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC4^(1 - n4)*tarC5^(1 - n5))/(2*(-1 + n5)*tarC1^n1) + (n2*tarC1^(1 - n1)*tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC5^(1 - n5))/((-1 + n5)*tarC4^n4) - (n2*pp*tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC5^(1 - n5))/(2*(-1 + n5)*tarC1^n1*tarC4^n4) - (n1*tarC1^(-1 - n1)*tarC2^(1 - n2)*tarC3^(-1 - n3)*tarC5^(1 - n5))/((-1 + n5)*tarC4^n4) + (n1*pp*tarC1^(-1 - n1)*tarC3^(-1 - n3)*tarC5^(1 - n5))/(2*(-1 + n5)*tarC2^n2*tarC4^n4) + ((n1 - n2)*tarC3^(-1 - n3)*tarC5^(1 - n5))/(2*(-1 + n5)*tarC1^n1*tarC2^n2*tarC4^n4) - (n1*tarC1^(-1 - n1)*tarC5^(1 - n5))/(2*(-1 + n5)*tarC2^n2*tarC3^n3*tarC4^n4) - (n4*tarC3^(-1 - n3)*tarC4^(-1 - n4)*tarC5^(2 - n5))/((-1 + n5)*tarC1^n1*tarC2^n2) + ((1 + n3)*tarC3^(-2 - n3)*tarC5^(2 - n5))/((-1 + n5)*tarC1^n1*tarC2^n2*tarC4^n4) - (n2*tarC2^(-1 - n2)*tarC3^(-1 - n3)*tarC5^(2 - n5))/((-1 + n5)*tarC1^n1*tarC4^n4) + (n1*tarC1^(-1 - n1)*tarC3^(-1 - n3)*tarC5^(2 - n5))/((-1 + n5)*tarC2^n2*tarC4^n4) + (tarC3^(-1 - n3)*tarC4^(1 - n4))/(tarC1^n1*tarC2^n2*tarC5^n5);
+
+
+
+*   n3 == 1 && n4 == 1 && n5 == 1 && n2 != 0
+id,only,ifmatch->sortme 1/tarC1^n1?neg0_/tarC2^n2?neg_/tarC3/tarC4/tarC5 =
+-((tarC1^(1 - n1)*tarC2^(-1 - n2))/((-1 + n1)*tarC3*tarC4^2)) + (tarC1^(1 - n1)*tarC2^(-1 - n2))/((-1 + n1)*tarC3^2*tarC4) - ((1 + n2)*tarC1^(1 - n1)*tarC2^(-2 - n2))/((-1 + n1)*tarC3*tarC4) + tarC2^(-1 - n2)/(tarC1^n1*tarC3*tarC4) + (tarC1^(1 - n1)*tarC2^(-1 - n2))/((-1 + n1)*tarC3*tarC5^2) - (tarC1^(1 - n1)*tarC2^(-1 - n2))/((-1 + n1)*tarC4*tarC5^2) - (tarC1^(1 - n1)*tarC2^(-1 - n2))/((-1 + n1)*tarC3^2*tarC5) + ((1 + n2)*tarC1^(1 - n1)*tarC2^(-2 - n2))/(2*(-1 + n1)*tarC3*tarC5) + (tarC1^(1 - n1)*tarC2^(-1 - n2))/((-1 + n1)*tarC4^2*tarC5) - tarC2^(-1 - n2)/(2*tarC1^n1*tarC4*tarC5) - ((1 + n2)*pp*tarC1^(1 - n1)*tarC2^(-2 - n2))/(2*(-1 + n1)*tarC3*tarC4*tarC5) + ((1 + n2)*tarC1^(2 - n1)*tarC2^(-2 - n2))/((-1 + n1)*tarC3*tarC4*tarC5) + ((-2 + n1 - n2)*tarC1^(1 - n1)*tarC2^(-1 - n2))/(2*(-1 + n1)*tarC3*tarC4*tarC5) + (pp*tarC2^(-1 - n2))/(2*tarC1^n1*tarC3*tarC4*tarC5);
+
+
+
+*   n2 == 0 && n3 == 1 && n4 == 1 && n5 == 1 && n1 != 0
+if(count(tarC2,-1) == 0) id,only,ifmatch->sortme 1/tarC1^n1?neg_/tarC3/tarC4/tarC5 =
+(2*pp*tarC1^(-1 - n1)*rat(1, -2 + d - n1))/(3*tarC3^2*tarC4) + (2*(1 + n1)*pp*tarC1^(-2 - n1)*rat(1, -2 + d - n1))/(3*tarC3*tarC4) - (2*pp*tarC1^(-1 - n1)*rat(1, -2 + d - n1))/(3*tarC3^2*tarC5) + ((-1 + n1)*tarC1^(-1 - n1)*rat(1, -2 + d - n1))/(tarC4*tarC5) - (2*(1 + n1)*pp*tarC1^(-2 - n1)*tarC2*rat(1, -2 + d - n1))/(3*tarC3*tarC4*tarC5) - (pp*tarC1^(-1 - n1)*tmm*rat(1, -2 + d - n1))/(tarC3*tarC4^2*tarC5) + (tarC1^(-1 - n1)*((2*pp*rat(1, -2 + d - n1))/3 - 2*tmm*rat(1, -2 + d - n1)))/(tarC3*tarC4^2) + (tarC1^(-1 - n1)*((-2*pp*rat(1, -2 + d - n1))/3 + tmm*rat(1, -2 + d - n1)))/(tarC4^2*tarC5) + (tarC1^(-2 - n1)*((-4*(1 + n1)*pp*rat(1, -2 + d - n1))/3 + 2*(1 + n1)*tmm*rat(1, -2 + d - n1)))/(tarC4*tarC5) + (tarC1^(-2 - n1)*((4*(1 + n1)*pp^2*rat(1, -2 + d - n1))/3 - 4*(1 + n1)*pp*tmm*rat(1, -2 + d - n1)))/(tarC3*tarC4*tarC5) + ((-2 + n1)*rat(1, 2 - d + n1))/(n1*tarC1^n1*tarC3*tarC4^2) - ((-2 + n1)*rat(1, 2 - d + n1))/(n1*tarC1^n1*tarC4^2*tarC5) - (4*tmm*rat(1, 2 - d + n1))/(n1*tarC1^n1*tarC3*tarC4^3) + (2*tmm*rat(1, 2 - d + n1))/(n1*tarC1^n1*tarC3^2*tarC4^2) - (2*tmm*rat(1, 2 - d + n1))/(n1*tarC1^n1*tarC4^2*tarC5^2) + (4*tmm*rat(1, 2 - d + n1))/(n1*tarC1^n1*tarC4^3*tarC5) + (pp*tarC1^(-1 - n1)*rat(-11 + 4*d - 5*n1, -2 + d - n1))/(3*tarC3*tarC4*tarC5);
+
+endif;
+
+goto endrec;         
+la sortme;
+$irep = 0;
+la endrec;
+        
+ModuleOption,minimum,$irep;
+.sort:red2l-T2-`$repcount++';
+#redefine irep "`$irep'"
+#enddo
+#endprocedure
+
+
+
+* 
+* count bad for neg num!!!!!
+* 
+
+#procedure to1l(TOPO)
+        if(count(int`TOPO',1));        
+***************************************************         
+*       GxG        
+        if(((count(tarC1,-1) > 0) || (count(tarC3,-1) > 0)) && ((count(tarC2,-1) > 0) || (count(tarC4,-1) > 0)) && (count(tarC5,1) >= 0));
+        Multiply intGxG/int`TOPO';        
+
+***************************************************         
+*       TxG
+        elseif((count(tarC1,1) >= 0) && ((count(tarC2,-1) > 0) || (count(tarC4,-1) > 0)) && (count(tarC3,1) >= 0) && (count(tarC5,-1) > 0));
+        Multiply intTxG/int`TOPO';        
+
+***************************************************         
+*       GxT
+        elseif(((count(tarC1,-1) > 0) || (count(tarC3,-1) > 0)) && (count(tarC2,1) >= 0) && (count(tarC4,1) >= 0) && (count(tarC5,-1) > 0));
+        Multiply intGxT/int`TOPO';        
+        endif;        
+        endif;
+#endprocedure
+
+
+
+* Reduce two-loop tadpole by hand
+#procedure red2l
+
+        if(count(intFG,1)) Multiply sdim(0)*intF/intFG;
+
+
+        #message
+        #message reduce F                
+        #message
+        #$repcount = 1;        
+        #do irep=1,1
+                #$irep = 1;                
+                if(count(intF,1));
+                #call redF
+                id,only intF/tarC1/tarC2/tarC3/tarC4/tarC5 = intFG*TFI(1,1,1,1,1);                
+                endif;
+*                 #breakdo
+                goto endrec;
+                la dopartfrac;
+*                 #call partfrac
+                $irep = 0;
+                la endrec;
+                
+                ModuleOption,minimum,$irep;
+                .sort:redF-noshift-`$repcount++';
+                #if `$irep'==0
+                        #call partfrac        
+                #endif                                
+                #redefine irep "`$irep'"
+        #enddo
+        id sdim(0) = 1;        
+        #printtimes
+        .sort:red-F-done;
+
+        #call zeroTFI(F)
+
+        #call uniqueVnew(F)
+        #call uniqueJnew(F)
+        #call uniqueT2new(F)
+        #call to1l(F)
+*       reduce V
+        #message
+        #message reduce V                
+        #message
+        #call red01111
+        #printtimes
+        .sort:red-V-done;        
+        #call zeroTFI(V)        
+        #call partfrac
+*       rename V
+        #call uniqueVnew(V)
+        id,only intV/tarC2/tarC3/tarC4/tarC5 = intFG*TFI(0,1,1,1,1); 
+        #call uniqueJnew(V)
+        #call uniqueT2new(V)
+        #call to1l(V)
+*       reduce J
+        #message
+        #message reduce J
+        #message        
+        #call red01101
+        #printtimes
+        .sort:red-J-done;        
+        #call zeroTFI(J)
+        #call partfrac
+*       rename J
+        #call uniqueJnew(J)
+        id,only intJ/tarC2^2/tarC3/tarC5 = intFG*TFI(2,0,0,1,1);
+        id,only intJ/tarC2/tarC3/tarC5   = intFG*TFI(1,0,0,1,1);                
+        #call uniqueT2new(J)
+        #call to1l(J)
+*       reduce T2
+        id tarC1^n1?pos_ = (tk1.tk1 - tmm)^n1;
+        id tarC2^n2?pos_ = (tk2.tk2 - tmm)^n2;
+        id tarC3^n3?pos_ = (tk1.tk1 - 2*tk1.tp + pp - tmm)^n3;
+        id tarC4^n4?pos_ = (tk2.tk2 - 2*tk2.tp + pp - tmm)^n4;
+        id tarC5^n5?pos_ = (tk1.tk1 - 2*tk1.tk2 + tk2.tk2 - tmm)^n5;
+        
+        
+*       all tarC in num con to SP !!!        
+        #call spcontract1(T2,1)
+        
+        
+        if((count(tarC1,-1) == 0) && (count(tarC3,-1) == 0)) Multiply replace_(intT2,intTxG);
+        if((count(tarC2,-1) == 0) && (count(tarC4,-1) == 0)) Multiply replace_(intT2,intGxT);
+        
+        
+        #call redTad125(T2)
+        
+        
+* Now reduce remaining low powers of (k1.p) and (k2.p)
+* eq B.10 in Davydychev, Smirnov, Tausk 
+* Nucl.Phys. B410 (1993) 325-342
+        
+        if(count(intT2,1));
+        id tp.tk1^x?pos0_*tp.tk2^y?pos0_/tarC1^n1?pos_/tarC2^n2?pos_/tarC5^n5? = 
+        mod_(x+y+1,2)*(1/2)^(x+y)*fac_(x)*fac_(y)*pp^((x+y)/2)*PochhammerINV((x+y)/2,d/2)*
+        sum_(j3,0,min_(x,y),
+        mod_(x-j3+1,2)*mod_(y-j3+1,2)*tk1.tk1^((x-j3)/2)*tk2.tk2^((y-j3)/2)*(2*tk1.tk2)^j3*invfac_((x-j3)/2)*invfac_((y-j3)/2)*invfac_(j3))/tarC1^n1/tarC2^n2/tarC5^n5;
+        endif;
+        
+        
+        #call spcontract1(T2,1)
+        
+        
+        
+*       T2=125        
+        if((count(tarC3,-1) == 0) && (count(tarC4,-1) == 0) && (count(tarC1,-1) > 0) && (count(tarC2,-1) > 0) && (count(tarC5,-1) == 0)) Multiply replace_(intT2,intTxT);
+        if((count(tarC3,-1) == 0) && (count(tarC4,-1) == 0) && (count(tarC1,-1) > 0) && (count(tarC2,-1) == 0) && (count(tarC5,-1) > 0)) Multiply replace_(intT2,intTxT);
+        if((count(tarC3,-1) == 0) && (count(tarC4,-1) == 0) && (count(tarC1,-1) == 0) && (count(tarC2,-1) > 0) && (count(tarC5,-1) > 0)) Multiply replace_(intT2,intTxT);
+
+*       T2=345        
+        if((count(tarC1,-1) == 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) == 0)) Multiply replace_(intT2,intTxT);
+        if((count(tarC1,-1) == 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1) > 0) && (count(tarC4,-1) == 0) && (count(tarC5,-1) > 0)) Multiply replace_(intT2,intTxT);
+        if((count(tarC1,-1) == 0) && (count(tarC2,-1) == 0) && (count(tarC3,-1) == 0) && (count(tarC4,-1) > 0) && (count(tarC5,-1) > 0)) Multiply replace_(intT2,intTxT);
+        
+        if(count(tarC1,-1) == 0) Multiply replace_(intT2,intTxG);
+        if(count(tarC2,-1) == 0) Multiply replace_(intT2,intGxT);
+        
+        if((count(tk1,1) == 0) && (count(tk2,1) == 0)) id intT2/tarC1^n1?pos_/tarC2^n2?pos_/tarC5^n5?pos_ = intFG*T2(0,n1,n2,n5);
+        if((count(tk1,1) == 0) && (count(tk2,1) == 0)) id intT2/tarC1^n1?pos_/tarC2^n2?pos_ = intFG*T1(0,n1)*T1(0,n2);
+        
+        
+*       Reduce T2        
+        #message
+        #message reduce T2                
+        #message
+        #do i=1,1
+                if(count(intFG,1));
+                #call redT2
+                if(match(T2(0,n1?pos_,n2?pos_,n3?pos_))) redefine i "0";
+                endif;
+                .sort:red-T2;
+        #enddo
+        #printtimes
+
+        if(count(intFG,1));
+        id T2(dp?,n1?pos_,n2?pos_,0) = T1(dp,n1)*T1(dp,n2);
+        id T2(dp?,n1?pos_,0,n3?pos_) = T1(dp,n1)*T1(dp,n3);
+        id T2(dp?,0,n2?pos_,n3?pos_) = T1(dp,n2)*T1(dp,n3);
+        
+        if(match(T2(dp?,n1?,n2?,n3?))) exit "Unreduced T2";
+        endif;
+
+        #call partfrac
+        
+        .sort
+        #call zeroTFI(GxG)
+        #call zeroTFI(GxT)
+        #call zeroTFI(TxG)
+        
+        
+*       Tensor reduction for factorized integrals         
+        if(count(intGxG,1));
+        #call tensG(tarC1,tarC3,tk1,tp)
+        endif;
+        .sort:intGxG-1;
+        if(count(intGxG,1));
+        #call tensG(tarC2,tarC4,tk2,tp)
+        id tp.tp^n? = pp^n;        
+        Multiply intFG/intGxG;        
+        endif;        
+        .sort:intGxG-2;
+        
+        if(count(intTxG,1));
+*       First integrate tadpole with tk1,tk2 in denominator:        
+        Multiply replace_(tk1,[tk1-tk2] + tk2);
+* Mark terms wo den as zero        
+        #call tensT1(tarC5,[tk1-tk2],0)
+*         Multiply replace_(zero,0);
+        endif;
+        .sort:intTxG-1;
+        if(count(intTxG,1));
+*       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
+        Multiply replace_([tk1-tk2],tk1 - tk2);        
+        #call tensG(tarC2,tarC4,tk2,tp)
+        id tp.tp^n? = pp^n;        
+        Multiply intFG/intTxG;        
+        endif;        
+        .sort:intTxG-2;
+
+        if(count(intGxT,1));
+        Multiply replace_(tk2, tk1 - [tk1-tk2]);
+        #call tensT1(tarC5,[tk1-tk2],0)
+        endif;
+        .sort:intGxT-1;
+        if(count(intGxT,1));
+*       tk1.tk2 in numerator wo denominator gives zero scale tadpole        
+        Multiply replace_([tk1-tk2],tk1 - tk2);        
+        #call tensG(tarC1,tarC3,tk1,tp)
+        id tp.tp^n? = pp^n;                
+         Multiply intFG/intGxT;        
+        endif;        
+        .sort:intGxT-2;
+
+
+*       One-loop tadpoles        
+        if(count(intTxT,1) && (count(tarC1,-1) > 0) && (count(tarC2,-1) > 0));
+        #call tensT1(tarC1,tk1,0)
+        #call tensT1(tarC2,tk2,0)
+*         Multiply replace_(zero,0);
+        Multiply intFG/intTxT;        
+        endif;
+        .sort:intTxT-(12);
+
+        if(count(intTxT,1) && (count(tarC1,-1) > 0) && (count(tarC5,-1) > 0));
+        Multiply replace_(tk2, tk1 - [tk1-tk2]);
+        #call tensT1(tarC1,tk1,0)
+        #call tensT1(tarC5,[tk1-tk2],0)
+*         Multiply replace_(zero,0);
+        Multiply intFG/intTxT;        
+        endif;
+        .sort:intTxT-(15);
+
+        if(count(intTxT,1) && (count(tarC2,-1) > 0) && (count(tarC5,-1) > 0));
+        Multiply replace_(tk1, [tk1-tk2] + tk2);
+        #call tensT1(tarC2,tk2,0)
+        #call tensT1(tarC5,[tk1-tk2],0)
+*         Multiply replace_(zero,0);
+        Multiply intFG/intTxT;        
+        endif;
+        .sort:intTxT-(25);
+
+        #call subpoch
+        
+*       Reducing one-loop G and T1        
+        #message
+        #message reduce G                
+        #message
+        
+        #call drrG(FG)
+
+        #call redG(FG)
+        id G(0,1,1) = Gx11;
+        
+        if(count(intFG,1));
+        id G(dp?,n1?,0) = T1(dp,n1);
+        id G(dp?,0,n2?) = T1(dp,n2);
+        endif;
+        #printtimes
+
+*       Now reduce one-loop tadpoles        
+        #message
+        #message drr T1                
+        #message
+        #do i=1,1
+                if(count(intFG,1));
+                #call drrT1
+                if(match(T1(dp?pos_,n1?pos_))) redefine i "0";
+                endif;
+                .sort:drr-T1;
+        #enddo
+        
+
+        #message
+        #message reduce T1                
+        #message
+        #do i=1,1
+                if(count(intFG,1));
+                #call redT1
+                if(match(T1(0,n1?pos_))) redefine i "0";
+                endif;
+                .sort:red-T1;
+        #enddo
+
+        if(count(intFG,1)) id T1(dp?,0) = 0;
+        #call partfrac
+        #call subpoch
+
+#endprocedure
+
+
+
 * 
 * Planar 8 line
 * 
-*--#[ redFG :
-#procedure redFG
+*--#[ redFGnew :
+#procedure redFGnew
 * Reduce factorized topology
 * F x G, where F and G are reduced wih TARCER separatelly
 
@@ -8523,6 +8018,7 @@ num(-1 + pp + tk1.tk1 - 2*tk1.tk2 + 2*tk1.tk4 - 2*tk1.tp + tk2.tk2 - 2*tk2.tk4 +
         Multiply replace_(d2, k2.k2 - tmm, d10, k1.k1 - 2*k1.k2 + k2.k2 - 2*k1.k3 + 2*k2.k3 + k3.k3 - tmm);
         Multiply replace_(d1,tarC1, d9,tarC2, d4,tarC3, d7,tarC4, d3,tarC5, d5,[pp-tmm]);        
 
+
 *       Inverse powers of denominators to scalar products
         id tarC1^n1?pos_=(k1.k1 - tmm)^n1;
         id tarC2^n2?pos_=(k1.k1 - 2*k1.k3 + k3.k3 - tmm)^n2;
@@ -8549,10 +8045,18 @@ num(-1 + pp + tk1.tk1 - 2*tk1.tk2 + 2*tk1.tk4 - 2*tk1.tp + tk2.tk2 - 2*tk2.tk4 +
         endif;        
         .sort:intFG-tensG;        
 
-        #call tarcer(FG)
+* All to tarC1...tarC5        
 
+        id tk1.tk1^n?pos_ = (tarC1 + tmm)^n;
+        id tk2.tk2^n?pos_ = (tarC2 + tmm)^n;
+        id tk1.tp^n?pos_  = ((tarC1 - tarC3 + pp)/2)^n;
+        id tk2.tp^n?pos_  = ((tarC2 - tarC4 + pp)/2)^n;
+        id tk1.tk2^n?pos_ = ((tarC1 + tarC2 - tarC5 + tmm)/2)^n;
+        
+        #call red2l
+        
 #endprocedure
-*--#] redFG :
+*--#] redFGnew :
 
 
 
@@ -11454,8 +10958,9 @@ ModuleOption,minimum,$irep;
         #message
         #message reduction FG started                 
         #message
-        #call redFG
+        #call redFGnew
         #printtimes
+
 *       Numerator reduction is based on topology with (pp^n5)        
 
 *       Integrals with denominator with power n5 now have argument (n5), n5 > 0
@@ -11983,14 +11488,14 @@ ModuleOption,minimum,$irep;
           - 4/3*z3
           )
 
+       + PR9ep0
+
        + ep * (
           + PR9ep1
           )
 
-       + PR9ep0
-
-       + ep * (
-          Oep(1,PR9)
+       + ep^2 * (
+          Oep(2,PR9)
           )
         ;
 
@@ -12018,14 +11523,14 @@ ModuleOption,minimum,$irep;
           + 29/9*z3
           )
 
+       + PR9dep0
+
        + ep * (
           + PR9dep1
           )
 
-       + PR9dep0
-
-       + ep * (
-          Oep(1,PR9d)
+       + ep^2 * (
+          Oep(2,PR9d)
           )
         ;
 

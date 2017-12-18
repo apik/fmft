@@ -1,4 +1,4 @@
-# FMFT-Fully Massive Four-loop Tadpoles
+# FMFT-Fully Massive Four-loop Tadpoles [![Build Status](https://travis-ci.org/apik/fmft.svg?branch=master)](https://travis-ci.org/apik/fmft)
 
 **FMFT** is a [FORM](https://github.com/vermaseren/form) package for
 reduction fully masive four-loop tadpole integrals to set of master
@@ -6,6 +6,10 @@ integrals. For correct operation **FMFT** needs last [development
 version of FORM](https://github.com/vermaseren/form) or at least
 **FORM** version 4 available as precompiled binary.
 
+If you use these software, please cite corresponding CPC paper:
+
+*[FMFT: Fully Massive Four-loop Tadpoles](http://inspirehep.net/record/1608891)
+By Andrey Pikelner*
 
 ## Basic topologies
 
@@ -48,25 +52,9 @@ version of **FORM** with 8 workers `tform -w8`. Time format is
 *hh:mm:ss*
 
 
- N       | 3       |4        |5        |6        |7        |8
+ N       | 3       | 4       | 5       | 6       | 7       | 8
 ---------|---------|---------|---------|---------|---------|---------
 **FMFT** | 0:00:11 | 0:00:27 | 0:01:55 | 0:07:35 | 0:25:31 | 01:30:31
 **FIRE** | 0:01:58 | 0:09:10 | 0:28:17 | 2:16:42 | 9:19:57 | 46:42:29
-
-
-## Tables for irreducible scalar products
-
-By default distributed with package and loaded automaticaly tables for
-irreducible scalar products up to weight 10. If higher power of
-irreducible scalar prodocts need to be reduced additional tables can
-be downloaded:
-
-
-[Tables for irreducible scalar products with powers from 11 to 20](https://dl.bintray.com/apik/FMFT/)
-
-To start using them simply unpack archives into directory `isp` and
-before including `fmft.hh` define new maximal rank of tensor
-structures in numerator with directive `#define SPMAXRANK "<WEIGHT>"`,
-where `<WEIGHT>` is a maximal weight of tables you want to load.
 
 
